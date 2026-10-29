@@ -1,4 +1,6 @@
 import type { Plugin } from 'vite';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { REPO_URL, SITE_NAME, TAGLINE, TOOLS } from '../src/catalog';
 
 // Makes the site easy to find for search engines and AI agents: canonical URLs,
@@ -7,6 +9,12 @@ import { REPO_URL, SITE_NAME, TAGLINE, TOOLS } from '../src/catalog';
 // JavaScript see the same content as people do.
 
 const GOOGLE_SITE_VERIFICATION = 'IZbejoesDXuu2BaDky4puUV2317mw6PRWAwMqmXrSA8';
+
+// Long-form guide for each tool page, kept as plain HTML in content/<tool id>.html.
+const guide = (id: string) => {
+  const file = join(import.meta.dirname, '..', 'content', `${id}.html`);
+  return existsSync(file) ? readFileSync(file, 'utf8') : '';
+};
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -57,7 +65,8 @@ export function discovery(site: string, base: string): Plugin {
             <h3>${esc(t.name)}</h3>
             <p>${esc(t.blurb)}</p>
           </a>`).join(''))
-        .replace('<!--tool-features-->', tool ? `<ul>${tool.features.map((f) => `<li>${esc(f)}</li>`).join('')}</ul>` : '');
+        .replace('<!--tool-features-->', tool ? `<ul>${tool.features.map((f) => `<li>${esc(f)}</li>`).join('')}</ul>
+${guide(tool.id)}` : '');
 
       return { html: out, tags: [
         { tag: 'link', attrs: { rel: 'canonical', href: url(path) }, injectTo: 'head' },

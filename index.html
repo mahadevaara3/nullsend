@@ -36,6 +36,46 @@
           <div class="card"><h3>Read the code</h3><p class="muted">The whole project is open source under AGPL-3.0, so any copy someone hosts must publish its code too.</p></div>
         </div>
       </section>
+
+      <section class="about" aria-labelledby="why-h">
+        <h2 id="why-h">Why "we don't upload your files" usually means very little</h2>
+        <p>Plenty of online tools promise that your files are private. Some do the work on a server and delete the file afterwards.
+          Some do the work in your browser, but also load analytics, ads or third-party scripts that could read the page. From the
+          outside, a visitor can't tell these apart. The promise is only as good as the company making it, and the company can change.</p>
+        <p>Nullsend is built so the promise can be checked rather than trusted:</p>
+        <ul>
+          <li><b>The work happens on your device.</b> Image processing, the AI model and text recognition all run in your browser with
+            WebAssembly. There is no server that receives files, because there is no server at all: the site is a set of static files.</li>
+          <li><b>The browser enforces it.</b> Each page carries a Content-Security-Policy with <code>connect-src 'self'</code>. That
+            tells your browser to refuse any attempt to send data to another site, even from code we didn't write.</li>
+          <li><b>Nothing third-party is loaded.</b> No analytics, no ads, no fonts or scripts from other servers. The AI models are
+            hosted on this site and checked against published checksums when the site is built.</li>
+          <li><b>You can watch it.</b> The meter in the header counts every byte each page sends while you use it.</li>
+        </ul>
+
+        <h2>What you can do here</h2>
+        <h3>Check a photo before you share it</h3>
+        <p>Phones record where and when each photo was taken, which device took it, and sometimes much more. AI image tools may embed
+          Content Credentials or the full prompt you used. <a href="tools/metadata/">Metadata X-ray</a> shows all of it, explains what each
+          item reveals, and removes it without re-compressing the image.</p>
+        <h3>Cut out a subject without uploading it</h3>
+        <p>The <a href="tools/background-remover/">background remover</a> runs a segmentation neural network on your own processor.
+          It's suited to ID photos, product shots and pictures of people who never agreed to have their image sent to a third party.</p>
+        <h3>Share a screenshot without leaking what's in it</h3>
+        <p><a href="tools/redact/">Redact &amp; Share</a> reads the text in a screenshot, finds emails, phone numbers, card numbers,
+          ID numbers and API keys, and covers them with solid boxes before you send it anywhere.</p>
+
+        <h2>Questions</h2>
+        <h3>Is Nullsend free?</h3>
+        <p>Yes. There's no account, no usage limit and no paid tier. Because the work runs on your device, serving another user costs
+          almost nothing.</p>
+        <h3>Who makes it, and how is it funded?</h3>
+        <p>Nullsend is an open-source project. It has no business model that depends on your data, and the code is public so you
+          don't have to take that on faith.</p>
+        <h3>Does it work on phones?</h3>
+        <p>Yes, in any modern mobile browser. The AI tools are slower on phones than on laptops, and the first run downloads their models
+          once.</p>
+      </section>
     </main>
     <script type="module" src="/src/home.ts"></script>
   </body>

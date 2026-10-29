@@ -1,0 +1,52 @@
+<h2>How it works</h2>
+<p>Most background removers send your photo to a server, run a model there and send back the result. This one ships the model to
+  you instead. The first time you use it, your browser downloads a 44 MB segmentation model from this site. After that it is cached
+  and works offline.</p>
+<p>The model is ISNet, a neural network built for <em>dichotomous image segmentation</em>: deciding, pixel by pixel, whether each
+  pixel belongs to the main subject or to the background. It looks at a 1024 × 1024 version of your photo and produces a soft
+  mask, which is scaled back up and applied to your original. The result has the same dimensions as the photo you started with.
+  The model runs on your processor through ONNX Runtime compiled to WebAssembly, the same engine many desktop apps use.
+  It uses an 8-bit quantized copy of the model, which is a quarter of the full size with very little loss in quality.</p>
+
+<h2>Why on-device matters for this tool</h2>
+<p>The photos people cut out are often the ones they'd least like to hand over: ID and visa photos, pictures of children,
+  products that haven't launched yet, and people who never agreed to have their picture uploaded anywhere. Upload-based services
+  each have their own terms about how long they keep images and what they may use them for. With an on-device tool, the question
+  doesn't come up: the photo never leaves the tab you're looking at.</p>
+
+<h2>Getting the best cutout</h2>
+<ul>
+  <li><b>One clear subject works best.</b> The model looks for the most prominent object. With several people or items, it may keep
+    all of them or pick one.</li>
+  <li><b>Contrast helps.</b> A subject that stands out from its background in color or brightness gives the cleanest edge.</li>
+  <li><b>Keep the subject in focus.</b> Motion blur and soft focus make edges ambiguous.</li>
+  <li><b>Expect trouble with see-through and very fine things.</b> Glass, veils, smoke and single strands of hair against a busy
+    background are hard for every segmentation model. Check the edges with the comparison slider before you use the result.</li>
+  <li><b>Use a large original.</b> The mask is computed at 1024 pixels and then scaled, so detail in the source photo still shows
+    in the final edges.</li>
+</ul>
+
+<h2>Choosing a background</h2>
+<ul>
+  <li><b>Transparent:</b> a PNG with an alpha channel, ready to place on a slide, website or design.</li>
+  <li><b>Color:</b> fills the background with any color. Pure white (<code>#ffffff</code>) is what most online marketplaces and many
+    ID photo rules ask for.</li>
+  <li><b>Blurred:</b> keeps your original background but blurs it heavily behind the sharp subject, similar to a phone's portrait mode.</li>
+</ul>
+
+<h2>Questions</h2>
+<h3>Is it free? Are there limits?</h3>
+<p>It's free, with no sign-up, watermark or limit on the number of photos. It runs on your own computer, so the only cost is a few
+  seconds of your processor's time.</p>
+<h3>How long does it take?</h3>
+<p>The first run includes the one-time model download. After that, a typical photo takes a few seconds on a recent laptop and longer
+  on older or low-power devices. Large photos take longer to load and save, but the model itself always works at the same size.</p>
+<h3>Does it work offline?</h3>
+<p>Yes, once you've used it once. The page and model are cached in your browser. You can also install Nullsend as an app from your
+  browser's menu.</p>
+<h3>Can I use the images commercially?</h3>
+<p>The images you create are yours. Nullsend's source code is licensed under AGPL-3.0, which covers the software, not the pictures you
+  make with it.</p>
+<h3>Is my photo uploaded anywhere?</h3>
+<p>No. The network meter at the top of the page counts every byte this page sends, and the page's security policy forbids connections
+  to any other site. The only downloads are this site's own code and model.</p>

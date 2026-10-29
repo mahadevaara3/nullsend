@@ -1,0 +1,55 @@
+<h2>Screenshots leak more than you think</h2>
+<p>A screenshot shares everything on screen at once, and it's easy to focus on the part you meant to show and miss the rest:
+  an email address in a header, a phone number in a chat, an order number, a notification that arrived at the wrong moment, or an
+  API key sitting in a terminal or config file. Once posted, a screenshot can be saved and re-shared indefinitely.</p>
+
+<h2>What it finds</h2>
+<p>The tool reads the text in your image with on-device OCR (Tesseract), then checks every line for these patterns:</p>
+<ul>
+  <li><b>Email addresses.</b></li>
+  <li><b>Phone numbers,</b> including international formats with a <code>+</code> country code. Dates and times are ignored.</li>
+  <li><b>Payment card numbers.</b> Every candidate is checked with the Luhn checksum that real card numbers pass, which removes most
+    false matches.</li>
+  <li><b>API keys and tokens</b> from OpenAI, Anthropic, Stripe, AWS, GitHub, Slack and Google, plus JSON Web Tokens and other long,
+    random-looking secrets.</li>
+  <li><b>National ID numbers:</b> India's Aadhaar and PAN, and US Social Security numbers.</li>
+  <li><b>Bank account numbers</b> in IBAN format.</li>
+  <li><b>IP addresses.</b></li>
+</ul>
+<p>Each finding is matched back to the exact words in the image and covered. You can switch any of them off, and drag on the image
+  to cover anything else.</p>
+<p>It does not detect names, street addresses or faces. Those don't follow a pattern that can be checked reliably, so always look over
+  the result before you share it.</p>
+
+<h2>Why solid boxes, not blur</h2>
+<p>Blurring or pixelating text feels safe, but it often isn't. Pixelation turns each block of text into averaged colors, and for
+  predictable content such as numbers, an attacker can pixelate guesses the same way and compare. Public tools exist that recover
+  pixelated text from screenshots using this approach (Depix is a well-known example). A solid box leaves nothing to compare against.
+  That's why it's the default here. Pixelate is available for things like faces in the background, where it's good enough.</p>
+
+<h2>Why the export is safe</h2>
+<p>A common redaction mistake is drawing a black rectangle on top of text in a document editor or PDF. The rectangle is a separate
+  layer, and the text underneath can still be selected, copied or extracted. Redact &amp; Share doesn't work in layers. When you export,
+  it draws a brand-new image: your original pixels with the boxes burned in. The covered text no longer exists in the file. The
+  new PNG also contains none of the original file's metadata.</p>
+
+<h2>How to use it</h2>
+<ol>
+  <li>Take a screenshot and press <b>Ctrl+V</b> (<b>⌘V</b> on a Mac) on this page, or drop or choose an image file.</li>
+  <li>Wait a few seconds while the text is read. The first run also downloads the OCR engine and English language data from this site.</li>
+  <li>Check the list of findings and the image. Untick anything you want to keep visible, and drag to cover anything that was missed.</li>
+  <li>Click <b>Download PNG</b>, <b>Copy</b> to paste it straight into a chat or document, or <b>Share</b> on devices that support it.</li>
+</ol>
+
+<h2>Questions</h2>
+<h3>Does it work with dark mode screenshots?</h3>
+<p>Usually, yes. Very small, low-contrast or decorative text is harder for OCR to read and may be missed. Cover it by dragging.</p>
+<h3>Which languages does it read?</h3>
+<p>English text, in Latin script. The patterns it looks for (emails, numbers, keys) are the same in most languages, so it often finds
+  them in other Latin-script text as well.</p>
+<h3>Can someone undo the redaction?</h3>
+<p>Not with solid boxes: the pixels under them are replaced before the image is saved. Pixelated areas can sometimes be partly
+  guessed, which is why the tool warns you when you choose that style.</p>
+<h3>Is my screenshot uploaded anywhere?</h3>
+<p>No. Text recognition and redaction both happen inside this browser tab. The network meter at the top of the page counts every byte
+  sent, and the page's security policy forbids connections to any other site.</p>
