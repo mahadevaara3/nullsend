@@ -6,6 +6,8 @@ import { REPO_URL, SITE_NAME, TAGLINE, TOOLS } from '../src/catalog';
 // llms.txt at the site root. All of it is static, so crawlers that don't run
 // JavaScript see the same content as people do.
 
+const GOOGLE_SITE_VERIFICATION = 'IZbejoesDXuu2BaDky4puUV2317mw6PRWAwMqmXrSA8';
+
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 export function discovery(site: string, base: string): Plugin {
@@ -60,6 +62,8 @@ export function discovery(site: string, base: string): Plugin {
       return { html: out, tags: [
         { tag: 'link', attrs: { rel: 'canonical', href: url(path) }, injectTo: 'head' },
         { tag: 'meta', attrs: { name: 'robots', content: 'index, follow' }, injectTo: 'head' },
+        // Search Console ownership (HTML-tag method; the HTML-file method is public/google*.html).
+        { tag: 'meta', attrs: { name: 'google-site-verification', content: GOOGLE_SITE_VERIFICATION }, injectTo: 'head' },
         { tag: 'meta', attrs: { property: 'og:type', content: 'website' }, injectTo: 'head' },
         { tag: 'meta', attrs: { property: 'og:site_name', content: SITE_NAME }, injectTo: 'head' },
         { tag: 'meta', attrs: { property: 'og:title', content: title }, injectTo: 'head' },
