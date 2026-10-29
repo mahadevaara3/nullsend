@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nullsend</title>
+    <meta name="description" content="Private file tools that run entirely in your browser. Nothing is uploaded, and you can verify it with a live network meter." />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="hero">
+        <h1>File tools that never see your files.</h1>
+        <p>Every tool here runs on your own device. Your photos and screenshots are never uploaded,
+          and you don't have to take our word for it: the meter in the corner counts every byte this page sends.</p>
+        <ul class="badges">
+          <li>0 bytes uploaded</li>
+          <li>Works offline</li>
+          <li>Open source</li>
+          <li>No account, no tracking</li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="tools-h">
+        <h2 id="tools-h" class="visually-hidden">Tools</h2>
+        <div class="grid" id="tools"></div>
+      </section>
+
+      <section id="verify" aria-labelledby="verify-h">
+        <h2 id="verify-h">Don't trust us. Verify.</h2>
+        <p class="muted">"Private" is easy to claim. These are four ways to check it, from quickest to most thorough.</p>
+        <div class="steps">
+          <div class="card"><h3>Watch the meter</h3><p class="muted">The pill at the top counts bytes uploaded and requests to other sites. Use a tool and watch it stay at zero.</p></div>
+          <div class="card"><h3>Pull the plug</h3><p class="muted">Open a tool once, then turn off Wi-Fi. It keeps working, because there is no server doing the work.</p></div>
+          <div class="card"><h3>Read the policy</h3><p class="muted">The page's Content-Security-Policy allows connections only to this site. The browser itself blocks anything else.</p></div>
+          <div class="card"><h3>Read the code</h3><p class="muted">The whole project is open source under AGPL-3.0, so any copy someone hosts must publish its code too.</p></div>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="/src/home.ts"></script>
+  </body>
+</html>

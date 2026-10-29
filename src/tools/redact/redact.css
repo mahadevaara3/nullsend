@@ -1,0 +1,15 @@
+.redact-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; margin-top: 16px; align-items: start; }
+@media (max-width: 860px) { .redact-layout { grid-template-columns: 1fr; } .side { position: static; } }
+.stage { padding: 12px; }
+.stage canvas { display: block; width: 100%; height: auto; cursor: crosshair; touch-action: none; border-radius: 6px; }
+.side { display: grid; gap: 12px; position: sticky; top: 76px; }
+.side h3 { margin: 0; }
+.redactions { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 40vh; overflow: auto; }
+.redactions li { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; background: var(--surface-2);
+  border-radius: 8px; padding: 6px 8px; font-size: 0.88rem; }
+.redactions li.off { opacity: 0.55; }
+.redactions .what { min-width: 0; }
+.redactions .what b { display: block; font-size: 0.78rem; color: var(--muted); font-weight: 600; }
+.redactions .what span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); }
+.redactions button { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 1rem; }
+.small { font-size: 0.82rem; margin: 0; }

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Metadata X-ray</title>
+    <meta name="description" content="See the GPS location, camera serial number and AI or C2PA markers hidden in a photo, then remove them without re-encoding. Runs in your browser; nothing is uploaded." />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="hero">
+        <h1>Metadata X-ray</h1>
+        <p>Photos carry more than pixels: where they were taken, which device took them, and sometimes the AI prompt that made them.
+          See exactly what's inside, then remove it without touching a single pixel.</p>
+      </section>
+      <div class="drop" id="drop">
+        <strong>Drop photos here, paste, or click to choose</strong>
+        <span class="muted">JPEG, PNG or WebP · as many as you like · read on your device</span>
+      </div>
+      <div class="row" id="batch" hidden style="margin-top:16px">
+        <label class="check"><input type="checkbox" id="keep-color" checked /> Keep color profile</label>
+        <label class="check"><input type="checkbox" id="keep-orient" checked /> Keep rotation</label>
+        <span style="flex:1"></span>
+        <button class="btn primary" id="clean-all">Clean all &amp; download</button>
+      </div>
+      <div id="results" style="display:grid;gap:16px;margin-top:16px"></div>
+    </main>
+    <script type="module" src="/src/tools/metadata/main.ts"></script>
+  </body>
+</html>

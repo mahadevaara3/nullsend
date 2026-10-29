@@ -1,0 +1,39 @@
+.xray { display: grid; gap: 14px; }
+.xray-head { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.xray-head img { width: 64px; height: 64px; object-fit: cover; border-radius: 10px; background: var(--surface-2); }
+.xray-head > div { flex: 1; min-width: 200px; }
+.xray-head h3 { margin: 0 0 4px; word-break: break-all; }
+
+.k-image { background: #64748b; }
+.k-structure { background: #94a3b8; }
+.k-color { background: #8b5cf6; }
+.k-metadata { background: #f97316; }
+.k-trailer { background: #ef4444; }
+.bytemap { display: flex; height: 18px; border-radius: 6px; overflow: hidden; gap: 1px; background: var(--border); }
+.bytemap span { min-width: 3px; flex-basis: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.82rem; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+.findings { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.findings li { display: grid; gap: 2px; padding: 10px 12px 10px 14px; border-radius: 10px; background: var(--surface-2); border-left: 4px solid var(--border); }
+.findings li span { color: var(--muted); font-size: 0.9rem; overflow-wrap: anywhere; }
+.findings .sev-high { border-left-color: var(--danger); }
+.findings .sev-ai { border-left-color: #8b5cf6; }
+.findings .sev-medium { border-left-color: var(--warn); }
+
+.gps { display: grid; grid-template-columns: minmax(0, 260px) 1fr; gap: 16px; align-items: center; background: var(--surface-2); border-radius: 10px; padding: 12px; }
+.gps svg { width: 100%; border-radius: 6px; background: var(--surface); }
+.gps .grid line, .gps .eq { stroke: var(--border); stroke-width: 1; }
+.gps .eq { stroke: var(--muted); stroke-dasharray: 3 3; }
+.gps .dot { fill: var(--danger); }
+.gps .ping { fill: var(--danger); opacity: 0.25; }
+.gps p { margin: 4px 0; }
+.small { font-size: 0.8rem; }
+@media (max-width: 560px) { .gps { grid-template-columns: 1fr; } }
+
+details summary { cursor: pointer; color: var(--muted); font-size: 0.9rem; }
+.seg-table { overflow-x: auto; margin-top: 8px; }
+.seg-table table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+.seg-table th, .seg-table td { text-align: left; padding: 5px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.seg-table td:last-child { white-space: normal; }
+.k-row-metadata td:nth-child(3), .k-row-trailer td:nth-child(3) { color: var(--danger); font-weight: 600; }

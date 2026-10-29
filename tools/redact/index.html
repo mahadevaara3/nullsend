@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Redact &amp; Share</title>
+    <meta name="description" content="Automatically find and black out emails, phone numbers, card numbers and API keys in screenshots with on-device OCR. Nothing is uploaded." />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="hero">
+        <h1>Redact &amp; Share</h1>
+        <p>Paste a screenshot. On-device OCR finds emails, phone numbers, card numbers, ID numbers and API keys,
+          and blacks them out before you share it. Drag on the image to cover anything else.</p>
+      </section>
+      <div class="drop" id="drop">
+        <strong>Paste a screenshot (Ctrl+V), drop it here, or click to choose</strong>
+        <span class="muted">PNG, JPEG or WebP · text recognition runs on your device</span>
+      </div>
+      <div class="card" id="status" hidden style="margin-top:16px">
+        <p id="status-text" style="margin-bottom:8px"></p>
+        <div class="progress"><div id="bar"></div></div>
+      </div>
+      <section id="editor" class="redact-layout" hidden>
+        <div class="card stage">
+          <canvas id="canvas" aria-label="Screenshot with redactions. Drag to add a box."></canvas>
+        </div>
+        <aside class="card side">
+          <h3>Redactions</h3>
+          <div class="seg" role="group" aria-label="Style">
+            <button type="button" data-style="solid" aria-pressed="true">Solid</button>
+            <button type="button" data-style="pixelate" aria-pressed="false">Pixelate</button>
+          </div>
+          <p class="muted small" id="style-note">Solid boxes are the safest choice: nothing underneath survives.</p>
+          <ul id="list" class="redactions"></ul>
+          <p class="muted small">Drag on the image to cover anything the scan missed.</p>
+          <div class="row">
+            <button class="btn primary" id="save">Download PNG</button>
+            <button class="btn" id="copy">Copy</button>
+            <button class="btn" id="share" hidden>Share…</button>
+          </div>
+          <p class="muted small">The exported image is redrawn from scratch: the hidden text and the original file's metadata are not in it.</p>
+        </aside>
+      </section>
+    </main>
+    <script type="module" src="/src/tools/redact/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Background Remover</title>
+    <meta name="description" content="Remove the background from any photo with an AI model that runs on your own device. Export a transparent PNG. Nothing is uploaded." />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="hero">
+        <h1>Background remover</h1>
+        <p>A segmentation neural network runs on your own processor and cuts out the subject.
+          Your photo never leaves this tab, so it's safe for ID photos, product shots and people.</p>
+      </section>
+      <div class="drop" id="drop">
+        <strong>Drop a photo here, paste, or click to choose</strong>
+        <span class="muted">JPEG, PNG or WebP · the first run downloads a 44 MB model from this site, then it's cached</span>
+      </div>
+      <div class="card" id="status" hidden style="margin-top:16px">
+        <p id="status-text" style="margin-bottom:8px"></p>
+        <div class="progress"><div id="bar"></div></div>
+      </div>
+      <section id="editor" hidden style="margin-top:16px">
+        <div class="card" style="display:grid;gap:14px">
+          <div class="row">
+            <div class="seg" role="group" aria-label="Background">
+              <button type="button" data-bg="transparent" aria-pressed="true">Transparent</button>
+              <button type="button" data-bg="color" aria-pressed="false">Color</button>
+              <button type="button" data-bg="blur" aria-pressed="false">Blurred</button>
+            </div>
+            <input type="color" id="color" value="#ffffff" aria-label="Background color" />
+            <span style="flex:1"></span>
+            <span class="muted mono" id="timing"></span>
+          </div>
+          <div class="compare checker" id="compare">
+            <img id="before" alt="Original" />
+            <canvas id="after" aria-label="Result"></canvas>
+            <input type="range" id="split" min="0" max="100" value="50" aria-label="Compare original and result" />
+            <div class="handle" id="handle"></div>
+          </div>
+          <div class="row">
+            <button class="btn primary" id="save">Download PNG</button>
+            <button class="btn" id="copy">Copy to clipboard</button>
+            <button class="btn" id="another">Another photo</button>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="/src/tools/background/main.ts"></script>
+  </body>
+</html>
