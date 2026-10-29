@@ -1,6 +1,7 @@
 import { defineConfig, type Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { resolve } from 'node:path';
+import { discovery } from './build/discovery';
 
 // The single source of truth for what the app may talk to. connect-src 'self'
 // means even a compromised dependency cannot send your files anywhere else:
@@ -53,7 +54,13 @@ function securityHeaders(): Plugin {
   };
 }
 
+// Set BASE_PATH=/nullsend/ when deploying to a GitHub Pages project site.
+const base = process.env.BASE_PATH ?? '/';
+// The public address used in canonical links, the sitemap and llms.txt.
+const site = process.env.SITE_URL ?? 'https://mahadevaara3.github.io/nullsend/';
+
 export default defineConfig({
+  base,
   server: { headers: ISOLATION },
   preview: { headers: ISOLATION },
   build: {
@@ -69,6 +76,7 @@ export default defineConfig({
   },
   plugins: [
     securityHeaders(),
+    discovery(site, base),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'script',
@@ -79,16 +87,16 @@ export default defineConfig({
         theme_color: '#0f172a',
         background_color: '#0f172a',
         display: 'standalone',
-        icons: [{ src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' }],
+        icons: [{ src: `${base}icon.svg`, sizes: 'any', type: 'image/svg+xml', purpose: 'any' }],
       },
       workbox: {
-        globPatterns: ['**/*.{html,js,css,svg}'],
+        globPatterns: ['**/*.{html,js,css,svg,txt,xml}'],
         globIgnores: ['vendor/**'],
         navigateFallback: null,
         // Models are large and only needed by the tool that uses them, so they are
         // cached the first time that tool runs instead of on install.
         runtimeCaching: [{
-          urlPattern: ({ url }) => url.pathname.startsWith('/vendor/'),
+          urlPattern: ({ url }) => url.pathname.startsWith(`${base}vendor/`),
           handler: 'CacheFirst',
           options: { cacheName: 'nullsend-vendor', expiration: { maxEntries: 64 } },
         }],

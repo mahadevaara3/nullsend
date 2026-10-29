@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Metadata X-ray</title>
+    <title>Metadata X-ray: See and Remove Photo GPS, EXIF and AI Metadata</title>
     <meta name="description" content="See the GPS location, camera serial number and AI or C2PA markers hidden in a photo, then remove them without re-encoding. Runs in your browser; nothing is uploaded." />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
   </head>
@@ -25,6 +25,12 @@
         <button class="btn primary" id="clean-all">Clean all &amp; download</button>
       </div>
       <div id="results" style="display:grid;gap:16px;margin-top:16px"></div>
+      <section class="about">
+        <h2>What it does</h2>
+        <!--tool-features-->
+        <p class="muted">Everything happens in this browser tab. Your files are never uploaded, and the network meter at the top shows it.
+          <a href="../../#verify">How to verify</a>.</p>
+      </section>
     </main>
     <script type="module" src="/src/tools/metadata/main.ts"></script>
   </body>

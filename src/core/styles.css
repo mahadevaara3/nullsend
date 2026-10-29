@@ -149,3 +149,7 @@ input[type='color'] { width: 38px; height: 34px; border: 1px solid var(--border)
 @media (max-width: 640px) {
   .site-header { position: static; }
 }
+
+.about { margin-top: 48px; max-width: 720px; }
+.about ul { padding-left: 1.2em; margin: 0 0 1em; }
+.about li { margin-bottom: 0.3em; }

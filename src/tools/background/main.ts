@@ -1,5 +1,5 @@
 import { removeBackground, type Config } from '@imgly/background-removal';
-import { mountShell } from '../../core/shell';
+import { BASE, mountShell } from '../../core/shell';
 import { canvasToBlob, dropZone, download, withSuffix } from '../../core/files';
 import { formatBytes } from '../../core/meter';
 import './background.css';
@@ -25,7 +25,7 @@ let source: { file: File; original: ImageBitmap; cutout: ImageBitmap } | null = 
 // The model and ONNX runtime are served from this site (see scripts/vendor.mjs),
 // so the default third-party CDN is never contacted.
 const config: Config = {
-  publicPath: new URL('/vendor/imgly/', location.href).href,
+  publicPath: new URL(`${BASE}vendor/imgly/`, location.href).href,
   model: 'isnet_quint8',
   device: 'cpu',
   output: { format: 'image/png', quality: 1 },

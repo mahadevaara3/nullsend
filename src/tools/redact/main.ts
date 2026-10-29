@@ -1,5 +1,5 @@
 import { createWorker, OEM, type Worker as OcrWorker } from 'tesseract.js';
-import { mountShell } from '../../core/shell';
+import { BASE, mountShell } from '../../core/shell';
 import { canvasToBlob, dropZone, download, escapeHtml, withSuffix } from '../../core/files';
 import { detect, type Box, type Word } from './detect';
 import './redact.css';
@@ -33,9 +33,9 @@ function setStatus(text: string, fraction?: number) {
 // Engine, language data and worker script are all served from this site.
 function getWorker(): Promise<OcrWorker> {
   worker ??= createWorker('eng', OEM.LSTM_ONLY, {
-    workerPath: '/vendor/tesseract/worker.min.js',
-    corePath: '/vendor/tesseract/core',
-    langPath: '/vendor/tesseract/lang',
+    workerPath: `${BASE}vendor/tesseract/worker.min.js`,
+    corePath: `${BASE}vendor/tesseract/core`,
+    langPath: `${BASE}vendor/tesseract/lang`,
     workerBlobURL: false,
     logger: (m) => {
       const label = m.status === 'recognizing text' ? 'Reading the text on your device…' : 'Loading the text recognizer from this site…';
