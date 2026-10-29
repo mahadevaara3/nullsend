@@ -1,4 +1,5 @@
 import './styles.css';
+import './theme.css';
 import { installMeter, mountMeter } from './meter';
 import { REPO_URL, TOOLS, type ToolId } from '../catalog';
 
