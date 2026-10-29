@@ -20,7 +20,8 @@ const KIND_LABEL: Record<SegmentKind, string> = {
 };
 
 dropZone(document.getElementById('drop')!, {
-  accept: 'image/jpeg,image/png,image/webp',
+  // Windows often reports no MIME type for HEIC, so match the extension too.
+  accept: 'image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif',
   multiple: true,
   onFiles: (files) => {
     document.getElementById('drop')!.classList.add('compact');
@@ -78,6 +79,15 @@ function gpsMap(lat: number, lon: number): string {
   </div>`;
 }
 
+// People often expect a location because Google or Apple Photos shows one. Those apps
+// can place a photo without any GPS in the file, so say where the location went.
+const NO_GPS = `<details class="no-gps"><summary>No GPS location in this file</summary>
+  <p class="muted small">If your photo app shows a place for it, that place may not be stored in the file:
+  Google Photos and Apple Photos can estimate a location from your location history or recognized landmarks,
+  and keep locations you add by hand in their own database. Phones also remove GPS when you share a photo to a
+  website from the photo gallery. To check the original, pick it through the Files app, or download it to a computer
+  first (in Google Photos, the location setting “Remove geo location in items shared by link” must be off).</p></details>`;
+
 function render(item: Item) {
   const { file, container: c, report: r, card } = item;
   const meta = c.segments.filter((s) => s.kind === 'metadata' || s.kind === 'trailer');
@@ -95,7 +105,7 @@ function render(item: Item) {
       <button class="btn primary clean" ${meta.length === 0 ? 'disabled' : ''}>Remove metadata</button>
     </header>
     ${byteMap(c)}
-    ${r.gps ? gpsMap(r.gps.lat, r.gps.lon) : ''}
+    ${r.gps ? gpsMap(r.gps.lat, r.gps.lon) : NO_GPS}
     ${r.findings.length ? `<ul class="findings">${r.findings.map((f) => `
       <li class="sev-${f.severity}"><b>${escapeHtml(f.title)}</b><span>${escapeHtml(f.detail)}</span></li>`).join('')}</ul>`
       : '<p class="muted">No identifying metadata found.</p>'}
@@ -106,6 +116,11 @@ function render(item: Item) {
         <td class="mono">${escapeHtml(s.id)}</td><td>${escapeHtml(s.label)}</td></tr>`).join('')}
       </tbody></table></div></details>`;
   card.querySelector<HTMLButtonElement>('.clean')!.addEventListener('click', () => clean(item));
+  // Most browsers other than Safari can't decode HEIC, so show a format badge instead of a broken image.
+  const img = card.querySelector('img')!;
+  img.addEventListener('error', () => img.replaceWith(Object.assign(document.createElement('span'), {
+    className: 'thumb-none', textContent: c.format.toUpperCase(),
+  })));
 }
 
 function clean(item: Item) {
@@ -123,13 +138,23 @@ function clean(item: Item) {
   card.querySelector('.result')!.innerHTML = `<div class="notice ${ok && pixelsSame ? '' : 'danger'}">
     ${ok ? '✓ Verified: a re-scan of the new file finds no metadata' : '⚠ Some metadata could not be removed'}${onlyOrientation ? ' (except the rotation flag you chose to keep)' : ''}.
     ${formatBytes(c.bytes.length - out.length)} removed. ${pixelsSame ? 'Pixel data is byte-for-byte identical, with no re-compression.' : 'Pixel data changed unexpectedly.'}</div>`;
-  download(new Blob([out as BlobPart], { type: file.type }), withSuffix(file.name, 'clean'));
+  download(new Blob([out as BlobPart], { type: file.type || `image/${c.format}` }), withSuffix(file.name, 'clean'));
 }
 
+// Compared as one run of bytes: a HEIC media block splits into several image segments
+// around the metadata, and those merge once the metadata is cut out.
 function sameImageData(a: Container, b: Container): boolean {
-  const img = (c: Container) => c.segments.filter((s) => s.kind === 'image').map((s) => c.bytes.subarray(s.offset, s.offset + s.length));
+  const img = (c: Container) => c.segments.filter((s) => s.kind === 'image' && s.length > 0).map((s) => c.bytes.subarray(s.offset, s.offset + s.length));
   const x = img(a), y = img(b);
-  return x.length === y.length && x.every((p, i) => p.length === y[i].length && p.every((v, j) => v === y[i][j]));
+  const len = (p: Uint8Array[]) => p.reduce((n, q) => n + q.length, 0);
+  if (len(x) !== len(y)) return false;
+  let i = 0, j = 0, xi = 0, yj = 0;
+  while (i < x.length && j < y.length) {
+    if (x[i][xi++] !== y[j][yj++]) return false;
+    if (xi === x[i].length) { i++; xi = 0; }
+    if (yj === y[j].length) { j++; yj = 0; }
+  }
+  return true;
 }
 
 document.getElementById('clean-all')!.addEventListener('click', async () => {

@@ -6,7 +6,7 @@ Private file tools that run entirely in your browser, built so you don't have to
 
 | Tool | What it does | How it runs |
 |---|---|---|
-| **Metadata X-ray** | Shows GPS location, device serial numbers, embedded thumbnails, C2PA credentials and AI-generation markers (including Stable Diffusion / ComfyUI prompts). Removes them **without re-encoding**. | Hand-written JPEG/PNG/WebP container parser; [exifr](https://github.com/MikeKovarik/exifr) for EXIF fields |
+| **Metadata X-ray** | Shows GPS location, device serial numbers, embedded thumbnails, C2PA credentials and AI-generation markers (including Stable Diffusion / ComfyUI prompts). Removes them **without re-encoding**. | Hand-written JPEG/PNG/WebP/HEIC container parser; [exifr](https://github.com/MikeKovarik/exifr) for EXIF fields |
 | **Background remover** | Cuts out the subject and exports a transparent PNG, a solid color, or a "portrait mode" blur. | ISNet segmentation model (44 MB, quantized) on ONNX Runtime WebAssembly via [@imgly/background-removal](https://github.com/imgly/background-removal-js) |
 | **Redact & Share** | Finds emails, phones, card numbers (Luhn-checked), Aadhaar/PAN, SSN, IBAN, IPs and API keys in screenshots, and blacks them out. Drag to add boxes. | [Tesseract.js](https://github.com/naptha/tesseract.js) OCR + pattern detection mapped back to word boxes |
 
@@ -22,7 +22,7 @@ Most "we don't upload your files" sites ask for trust. This one gives you ways t
 
 ### Engineering details worth a look
 
-- **Lossless metadata removal.** [`container.ts`](src/tools/metadata/container.ts) walks JPEG markers (including entropy-coded scan data, byte stuffing and restart markers), PNG chunks and WebP RIFF chunks, then rebuilds the file from the kept segments. The result is re-parsed and its pixel data compared byte for byte with the original, so the "Verified" message is computed, not assumed.
+- **Lossless metadata removal.** [`container.ts`](src/tools/metadata/container.ts) walks JPEG markers (including entropy-coded scan data, byte stuffing and restart markers), PNG chunks, WebP RIFF chunks and the HEIC item index ([`heif.ts`](src/tools/metadata/heif.ts)), then rebuilds the file from the kept segments. For HEIC, EXIF and XMP items are dropped from the index, their bytes are cut out of `mdat`, and every remaining item offset is shifted to match. The result is re-parsed and its pixel data compared byte for byte with the original, so the "Verified" message is computed, not assumed.
 - **Rotation survives cleaning.** Removing EXIF normally loses the orientation flag, so portrait photos turn sideways. The cleaner writes back a hand-built 36-byte EXIF block holding only that tag.
 - **Hidden data after the image.** Ultra HDR gain maps, depth maps and appended files after JPEG `EOI` are found and removed.
 - **The redaction you see is the redaction you export.** The canvas is redrawn from the original with boxes burned in; no overlay layer, and no metadata in the PNG.

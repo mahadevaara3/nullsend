@@ -48,13 +48,27 @@ async function pngText(c: Container): Promise<Record<string, string>> {
   return out;
 }
 
-/** The raw TIFF block inside an EXIF segment, so exifr can read EXIF from PNG/WebP too. */
+/** The raw TIFF block inside an EXIF segment, so exifr can read EXIF from PNG/WebP/HEIC too. */
 function exifTiff(c: Container): Uint8Array | undefined {
   if (c.format === 'jpeg') return undefined;
-  const seg = c.segments.find((s) => s.id === 'eXIf' || s.id === 'EXIF');
+  const seg = c.segments.find((s) => s.id === 'eXIf' || s.id === 'EXIF' || s.id === 'Exif');
   if (!seg) return undefined;
-  const p = seg.payload;
+  let p = seg.payload;
+  // A HEIC EXIF item starts with a 4-byte offset to the TIFF header.
+  if (c.format === 'heic' && p.length > 4) p = p.subarray(4 + new DataView(p.buffer, p.byteOffset).getUint32(0));
   return latin1.decode(p.subarray(0, 6)) === 'Exif\0\0' ? p.subarray(6) : p;
+}
+
+/** XMP writes GPS as "DDD,MM.mmN" or "DDD,MM,SSN". Some apps store location only here. */
+function xmpGps(xmp: string): { lat: number; lon: number } | undefined {
+  const coord = (tag: string) => {
+    const m = new RegExp(`exif:${tag}(?:="|>)\\s*(\\d+),(\\d+(?:\\.\\d+)?)(?:,(\\d+(?:\\.\\d+)?))?([NSEW])`).exec(xmp);
+    if (!m) return undefined;
+    const v = +m[1] + +m[2] / 60 + (m[3] ? +m[3] / 3600 : 0);
+    return m[4] === 'S' || m[4] === 'W' ? -v : v;
+  };
+  const lat = coord('GPSLatitude'), lon = coord('GPSLongitude');
+  return lat !== undefined && lon !== undefined ? { lat, lon } : undefined;
 }
 
 const AI_TOOLS = [
@@ -81,8 +95,13 @@ export async function analyze(file: Blob, c: Container): Promise<Report> {
   } catch { /* unreadable EXIF: the segment map still shows it */ }
   const t = (k: string) => tags[k];
 
+  // AI and provenance markers live in XMP, C2PA manifests and PNG text chunks.
+  const metaText = c.segments.filter((s) => s.kind === 'metadata').map((s) => latin1.decode(s.payload)).join('\n');
+
   if (typeof t('latitude') === 'number' && typeof t('longitude') === 'number') {
     report.gps = { lat: t('latitude') as number, lon: t('longitude') as number, alt: t('GPSAltitude') as number | undefined };
+  } else report.gps = xmpGps(metaText);
+  if (report.gps) {
     add('high', 'Exact GPS location', `${report.gps.lat.toFixed(5)}, ${report.gps.lon.toFixed(5)}. This can point to your home or workplace.`);
   }
   const serials = ['BodySerialNumber', 'SerialNumber', 'LensSerialNumber', 'InternalSerialNumber']
@@ -105,8 +124,6 @@ export async function analyze(file: Blob, c: Container): Promise<Report> {
   }
   if (c.format === 'jpeg') report.orientation = (await exifr.orientation(file).catch(() => undefined)) ?? undefined;
 
-  // AI and provenance markers live in XMP, C2PA manifests and PNG text chunks.
-  const metaText = c.segments.filter((s) => s.kind === 'metadata').map((s) => latin1.decode(s.payload)).join('\n');
   const c2pa = c.segments.some((s) => s.label.startsWith('C2PA'));
   if (c2pa) {
     const gen = /claim_generator[^\x20-\x7e]{0,4}([\x20-\x7e]{3,80})/.exec(metaText)?.[1];

@@ -1,6 +1,7 @@
 .xray { display: grid; gap: 14px; }
 .xray-head { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
 .xray-head img { width: 64px; height: 64px; object-fit: cover; border-radius: 10px; background: var(--surface-2); }
+.xray-head .thumb-none { width: 64px; height: 64px; border-radius: 10px; background: var(--surface-2); display: grid; place-items: center; font-size: 0.75rem; font-weight: 600; color: var(--muted); }
 .xray-head > div { flex: 1; min-width: 200px; }
 .xray-head h3 { margin: 0 0 4px; word-break: break-all; }
 
@@ -29,6 +30,7 @@
 .gps .ping { fill: var(--danger); opacity: 0.25; }
 .gps p { margin: 4px 0; }
 .small { font-size: 0.8rem; }
+.no-gps p { margin: 6px 0 0; }
 @media (max-width: 560px) { .gps { grid-template-columns: 1fr; } }
 
 details summary { cursor: pointer; color: var(--muted); font-size: 0.9rem; }

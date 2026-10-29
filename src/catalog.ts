@@ -17,7 +17,7 @@ export const TOOLS = [
     features: [
       'Shows GPS location, device serial numbers, dates, embedded thumbnails and software',
       'Detects C2PA Content Credentials and AI-generation markers, including Stable Diffusion and ComfyUI prompts',
-      'Removes metadata from JPEG, PNG and WebP without re-encoding, so image quality is unchanged',
+      'Removes metadata from JPEG, PNG, WebP and HEIC without re-encoding, so image quality is unchanged',
       'Keeps the rotation flag so portrait photos stay upright',
     ],
   },

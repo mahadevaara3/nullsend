@@ -1,9 +1,11 @@
-// Walks the container structure of JPEG, PNG and WebP files and labels every
+// Walks the container structure of JPEG, PNG, WebP and HEIC files and labels every
 // segment/chunk. This is what lets us strip metadata *without re-encoding*:
 // pixel data is copied byte for byte, so quality is untouched.
 
 export type SegmentKind = 'image' | 'structure' | 'color' | 'metadata' | 'trailer';
-export type Format = 'jpeg' | 'png' | 'webp';
+import { parseHeif, stripHeif, type HeifLayout } from './heif';
+
+export type Format = 'jpeg' | 'png' | 'webp' | 'heic';
 
 export interface Segment {
   offset: number;
@@ -21,15 +23,21 @@ export interface Container {
   format: Format;
   bytes: Uint8Array;
   segments: Segment[];
+  /** HEIC item index, needed to rebuild the file. */
+  heif?: HeifLayout;
 }
 
 const latin1 = new TextDecoder('latin1');
 const startsWith = (b: Uint8Array, s: string) => latin1.decode(b.subarray(0, s.length)) === s;
 
+// Major and compatible brands of HEIC/HEIF stills (and AVIF, which shares the container).
+const HEIF_BRANDS = /heic|heix|heim|heis|hevc|hevx|mif1|msf1|avif/;
+
 export function detectFormat(b: Uint8Array): Format | null {
   if (b[0] === 0xff && b[1] === 0xd8) return 'jpeg';
   if (startsWith(b, '\x89PNG\r\n\x1a\n')) return 'png';
   if (startsWith(b, 'RIFF') && latin1.decode(b.subarray(8, 12)) === 'WEBP') return 'webp';
+  if (latin1.decode(b.subarray(4, 8)) === 'ftyp' && HEIF_BRANDS.test(latin1.decode(b.subarray(8, 8 + new DataView(b.buffer, b.byteOffset).getUint32(0) - 8)))) return 'heic';
   return null;
 }
 
@@ -38,7 +46,8 @@ export function parseContainer(bytes: Uint8Array): Container {
   if (format === 'jpeg') return { format, bytes, segments: parseJpeg(bytes) };
   if (format === 'png') return { format, bytes, segments: parsePng(bytes) };
   if (format === 'webp') return { format, bytes, segments: parseWebp(bytes) };
-  throw new Error('Unsupported file. Use a JPEG, PNG or WebP image.');
+  if (format === 'heic') { const { segments, layout } = parseHeif(bytes); return { format, bytes, segments, heif: layout }; }
+  throw new Error('Unsupported file. Use a JPEG, PNG, WebP or HEIC image.');
 }
 
 // ---------- JPEG ----------
@@ -168,6 +177,8 @@ const isKept = (s: Segment, o: StripOptions) =>
   s.kind === 'image' || s.kind === 'structure' || (s.kind === 'color' && o.keepColorProfile);
 
 export function stripMetadata(c: Container, o: StripOptions): Uint8Array {
+  // HEIC keeps its color profile inside the item properties shared with the image, so it always stays.
+  if (c.format === 'heic') return stripHeif(c.bytes, c.heif!);
   const kept = c.segments.filter((s) => isKept(s, o));
   const parts: Uint8Array[] = kept.map((s) => c.bytes.subarray(s.offset, s.offset + s.length));
 
