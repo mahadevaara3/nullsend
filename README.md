@@ -9,6 +9,7 @@ Private file tools that run entirely in your browser, built so you don't have to
 | **Metadata X-ray** | Shows GPS location, device serial numbers, embedded thumbnails, C2PA credentials and AI-generation markers (including Stable Diffusion / ComfyUI prompts). Removes them **without re-encoding**. | Hand-written JPEG/PNG/WebP/HEIC container parser; [exifr](https://github.com/MikeKovarik/exifr) for EXIF fields |
 | **Background remover** | Cuts out the subject and exports a transparent PNG, a solid color, or a "portrait mode" blur. | ISNet segmentation model (44 MB, quantized) on ONNX Runtime WebAssembly via [@imgly/background-removal](https://github.com/imgly/background-removal-js) |
 | **Redact & Share** | Finds emails, phones, card numbers (Luhn-checked), Aadhaar/PAN, SSN, IBAN, IPs and API keys in screenshots, and blacks them out. Drag to add boxes. | [Tesseract.js](https://github.com/naptha/tesseract.js) OCR + pattern detection mapped back to word boxes |
+| **PDF toolkit** | Merges, splits, reorders and rotates pages; photos to PDF and pages to PNG/JPEG. Removes document info, XMP, PieceInfo, comment authors and the EXIF of embedded JPEGs (losslessly), then re-scans the output. | [pdf-lib](https://github.com/Hopding/pdf-lib) to edit, [PDF.js](https://github.com/mozilla/pdf.js) to render; fonts, cmaps and decoders mirrored into `public/vendor` |
 
 ## Why "verifiable" and not just "private"
 

@@ -73,5 +73,17 @@ async function vendorImgly() {
   await writeFile(stampPath, IMGLY_VERSION);
 }
 
+// PDF.js loads these on demand: character maps and the 14 standard fonts for PDFs
+// that don't embed them, plus WebAssembly decoders for JPEG 2000, JBIG2 and color profiles.
+async function vendorPdfjs() {
+  const out = join(vendor, 'pdfjs');
+  const src = pkg('pdfjs-dist');
+  for (const dir of ['cmaps', 'standard_fonts', 'iccs']) await cp(join(src, dir), join(out, dir), { recursive: true });
+  // The QuickJS build only runs scripts embedded in PDFs, which we never do.
+  await cp(join(src, 'wasm'), join(out, 'wasm'), { recursive: true, filter: (f) => !f.includes('quickjs') });
+  console.log('vendor: pdfjs ready');
+}
+
 await vendorTesseract();
+await vendorPdfjs();
 await vendorImgly();

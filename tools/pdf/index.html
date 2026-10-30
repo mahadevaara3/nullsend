@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PDF Toolkit: Merge, Split, Reorder and Clean PDFs Without Uploading</title>
+    <meta name="description" content="Merge, split, reorder, rotate and remove metadata from PDFs, and turn photos into a PDF or pages into images. Runs in your browser; nothing is uploaded." />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="hero">
+        <h1>PDF toolkit</h1>
+        <p>Merge, split, reorder and rotate pages, turn photos into a PDF or pages into images, and remove the author names and
+          edit history a PDF carries. Contracts, bank statements and ID scans never leave this tab.</p>
+      </section>
+      <div class="drop" id="drop">
+        <strong>Drop PDFs or photos here, or click to choose</strong>
+        <span class="muted">PDF, JPEG, PNG or WebP · as many as you like · read on your device</span>
+      </div>
+      <div class="card status" id="status" hidden style="margin-top:16px">
+        <div class="scan"><img id="scan-img" alt="" /></div>
+        <div><p id="status-text"></p><div class="progress"><div id="bar"></div></div></div>
+      </div>
+      <section id="board" hidden>
+        <div class="toolbar">
+          <span class="muted" id="count"></span>
+          <span style="flex:1"></span>
+          <button class="btn small" id="rotate" disabled>Rotate ↻</button>
+          <button class="btn small" id="delete" disabled>Delete</button>
+          <button class="btn small" id="select-all">Select all</button>
+        </div>
+        <p class="muted small hint">Click pages to select them. Drag to reorder (on a phone, press and hold first).</p>
+        <div class="pages" id="pages"></div>
+
+        <div class="pdf-actions">
+          <div class="card">
+            <h3>Download</h3>
+            <div class="opts">
+              <label class="check"><input type="checkbox" id="clean" checked /> Remove metadata</label>
+              <label class="check" id="size-opt" hidden>Photo pages
+                <select id="page-size"><option value="a4">A4</option><option value="letter">Letter</option><option value="image">Photo size</option></select></label>
+            </div>
+            <div class="row">
+              <button class="btn primary" id="save">Download PDF</button>
+              <button class="btn" id="split">Split into pages</button>
+              <button class="btn" id="images">Export as images</button>
+              <select id="image-type" aria-label="Image format"><option value="png">PNG</option><option value="jpeg">JPEG</option></select>
+            </div>
+            <div id="result"></div>
+          </div>
+          <div class="card" id="found-card" hidden>
+            <h3>Found in your files</h3>
+            <div id="found"></div>
+          </div>
+        </div>
+      </section>
+      <section class="about">
+        <h2>What it does</h2>
+        <p class="muted">Everything happens in this browser tab. Your files are never uploaded, and the network meter at the top shows it.
+          <a href="../../#verify">How to verify</a>.</p>
+        <!--tool-features-->
+      </section>
+    </main>
+    <script type="module" src="/src/tools/pdf/main.ts"></script>
+  </body>
+</html>

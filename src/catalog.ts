@@ -51,6 +51,21 @@ export const TOOLS = [
       'Exports a fresh PNG with no hidden text and no metadata',
     ],
   },
+  {
+    id: 'pdf',
+    path: 'tools/pdf/',
+    icon: '📄',
+    name: 'PDF toolkit',
+    tag: 'Documents',
+    category: 'UtilitiesApplication',
+    blurb: 'Merge, split, reorder and rotate PDFs, turn photos into a PDF, and strip author names and edit history.',
+    features: [
+      'Merge PDFs and photos into one file, with drag-to-reorder page thumbnails',
+      'Split into single pages, extract selected pages, rotate or delete pages',
+      'Removes document info, XMP, comment authors and the EXIF of photos inside the PDF, then re-scans the result to verify',
+      'Exports pages as PNG or JPEG images at 150 dpi',
+    ],
+  },
 ] as const;
 
 export type ToolId = (typeof TOOLS)[number]['id'];

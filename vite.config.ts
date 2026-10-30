@@ -71,6 +71,7 @@ export default defineConfig({
         metadata: resolve(import.meta.dirname, 'tools/metadata/index.html'),
         background: resolve(import.meta.dirname, 'tools/background-remover/index.html'),
         redact: resolve(import.meta.dirname, 'tools/redact/index.html'),
+        pdf: resolve(import.meta.dirname, 'tools/pdf/index.html'),
       },
     },
   },
@@ -92,7 +93,7 @@ export default defineConfig({
       workbox: {
         // Pages are not precached: they're fetched fresh on every visit (below), and
         // the hashed JS/CSS they reference is precached so the tools still run offline.
-        globPatterns: ['**/*.{js,css,svg,txt,xml}'],
+        globPatterns: ['**/*.{js,mjs,css,svg,txt,xml}'],
         globIgnores: ['vendor/**'],
         navigateFallback: null,
         // These functions are copied into sw.js as source, so they can't use variables from this file.

@@ -1,0 +1,45 @@
+<h2>What a PDF says about you</h2>
+<p>Most people think of a PDF as a picture of a document. It's closer to a container, and the apps that make and edit PDFs write
+  details about you and your computer into it:</p>
+<ul>
+  <li><b>Author and title.</b> Word, Pages and most PDF printers copy the name from your account into the Author field. A file sent
+    "anonymously" often names its writer.</li>
+  <li><b>Creator and Producer.</b> The app and version that made the file, and often the operating system.</li>
+  <li><b>Created and modified dates.</b> When the document was really written, which may not match the date printed on it.</li>
+  <li><b>XMP metadata.</b> An XML block that can hold edit history, earlier titles, document IDs and the author again.</li>
+  <li><b>Comment authors.</b> Every highlight and sticky note records the name of the person who added it.</li>
+  <li><b>Photos with their EXIF intact.</b> A phone photo placed in a PDF usually keeps its camera data, including GPS
+    coordinates of where it was taken.</li>
+  <li><b>Private app data.</b> Illustrator, InDesign and others store their own data (PieceInfo) inside pages, sometimes including
+    content you deleted.</li>
+</ul>
+<p>When you add a PDF, the "Found in your files" box lists what that file actually contains.</p>
+
+<h2>What "Remove metadata" does</h2>
+<p>The new PDF is built from scratch: the pages are copied into an empty document, so its own catalog never had metadata. Then every
+  object in it is checked. Document info, XMP blocks, private app data and comment author names are removed, and EXIF and XMP are cut
+  out of embedded JPEG photos without re-compressing them. Finally, the file you download is read back and scanned again, and the
+  result is shown next to the download.</p>
+<p>Page content, text, fonts, links and form fields stay as they are. It does not remove text that is visible on the page, and it
+  is not redaction: covering text with a black box in another app usually leaves the text underneath selectable.</p>
+
+<h2>How to use it</h2>
+<ol>
+  <li>Drop one or more PDFs, photos, or both. Every page shows up as a thumbnail, in the order you added them.</li>
+  <li>Drag pages to reorder them. On a phone, press and hold a page first, then drag.</li>
+  <li>Click pages to select them, then rotate or delete the selection.</li>
+  <li><b>Download PDF</b> saves all pages as one file, or only the selected ones. <b>Split into pages</b> saves each page as its own
+    PDF, in a .zip. <b>Export as images</b> saves pages as PNG or JPEG files.</li>
+</ol>
+
+<h2>Questions</h2>
+<h3>Can I open password-protected PDFs?</h3>
+<p>Not yet. Remove the password in your PDF reader first (usually by printing to a new PDF), then add the result here.</p>
+<h3>Is there a size limit?</h3>
+<p>Only your device's memory. Files of a few hundred pages work on a laptop. Very large scanned files can be slow on phones.</p>
+<h3>Will scanned text stay searchable?</h3>
+<p>Yes. Merging, splitting, rotating and cleaning keep each page's content as it was, including any text layer. Exporting as images
+  does not keep text, because an image is only pixels.</p>
+<h3>Do photos lose quality?</h3>
+<p>Not JPEGs: they're placed in the PDF byte for byte, minus their metadata. WebP images and rotated phone photos are redrawn upright
+  and saved as high-quality JPEGs, because PDF has no rotation flag for images.</p>
