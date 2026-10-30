@@ -16,6 +16,14 @@ const guide = (id: string) => {
   return existsSync(file) ? readFileSync(file, 'utf8') : '';
 };
 
+// Splits each long-form section at its <h2>s into heading + body blocks, so the
+// layout can put the heading beside the text instead of above it.
+const blocks = (html: string) => html.replace(/(<section class="about"[^>]*>)([\s\S]*?)(<\/section>)/g, (_, open, body, close) =>
+  open + body.split(/(?=<h2[\s>])/).map((chunk: string) => {
+    const m = /^(<h2[^>]*>[\s\S]*?<\/h2>)([\s\S]*)$/.exec(chunk);
+    return m ? `<div class="block">${m[1]}<div class="block-body">${m[2]}</div></div>` : chunk;
+  }).join('') + close);
+
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 export function discovery(site: string, base: string): Plugin {
@@ -68,7 +76,7 @@ export function discovery(site: string, base: string): Plugin {
         .replace('<!--tool-features-->', tool ? `<ul>${tool.features.map((f) => `<li>${esc(f)}</li>`).join('')}</ul>
 ${guide(tool.id)}` : '');
 
-      return { html: out, tags: [
+      return { html: blocks(out), tags: [
         { tag: 'link', attrs: { rel: 'canonical', href: url(path) }, injectTo: 'head' },
         { tag: 'meta', attrs: { name: 'robots', content: 'index, follow' }, injectTo: 'head' },
         // Search Console ownership (HTML-tag method; the HTML-file method is public/google*.html).

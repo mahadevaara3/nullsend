@@ -11,6 +11,7 @@ const drop = $('drop');
 const status = $('status');
 const statusText = $('status-text');
 const bar = $('bar');
+const scanImg = $<HTMLImageElement>('scan-img');
 const editor = $('editor');
 const canvas = $<HTMLCanvasElement>('canvas');
 const list = $<HTMLUListElement>('list');
@@ -26,6 +27,7 @@ let worker: Promise<OcrWorker> | null = null;
 
 function setStatus(text: string, fraction?: number) {
   status.hidden = false;
+  status.classList.remove('failed');
   statusText.textContent = text;
   if (fraction !== undefined) bar.style.width = `${Math.round(fraction * 100)}%`;
 }
@@ -51,6 +53,8 @@ async function run(file: File) {
   fileName = file.name;
   drop.classList.add('compact');
   editor.hidden = true;
+  URL.revokeObjectURL(scanImg.src);
+  scanImg.src = URL.createObjectURL(file);
   setStatus('Starting…', 0);
   try {
     image?.close();
@@ -69,6 +73,7 @@ async function run(file: File) {
     render();
   } catch (e) {
     setStatus(`Something went wrong: ${(e as Error).message}`);
+    status.classList.add('failed');
   }
 }
 

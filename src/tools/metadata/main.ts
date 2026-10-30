@@ -32,7 +32,10 @@ dropZone(document.getElementById('drop')!, {
 async function addFile(file: File) {
   const card = document.createElement('article');
   card.className = 'card xray';
-  card.innerHTML = `<p class="muted">Reading ${escapeHtml(file.name)}…</p>`;
+  const thumb = URL.createObjectURL(file);
+  card.innerHTML = `<div class="status"><div class="scan"><img src="${thumb}" alt="" /></div>
+    <div><p class="muted">Reading ${escapeHtml(file.name)}…</p><div class="progress"><div style="width:100%"></div></div></div></div>`;
+  card.querySelector('.scan img')!.addEventListener('error', (e) => (e.target as Element).remove());
   results.prepend(card);
   try {
     const container = parseContainer(new Uint8Array(await file.arrayBuffer()));
@@ -43,6 +46,8 @@ async function addFile(file: File) {
     batch.hidden = false;
   } catch (e) {
     card.innerHTML = `<div class="notice danger"><b>${escapeHtml(file.name)}</b>: ${escapeHtml((e as Error).message)}</div>`;
+  } finally {
+    URL.revokeObjectURL(thumb);
   }
 }
 

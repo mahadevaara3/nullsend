@@ -11,6 +11,7 @@ const drop = $('drop');
 const status = $('status');
 const statusText = $('status-text');
 const bar = $('bar');
+const scanImg = $<HTMLImageElement>('scan-img');
 const editor = $('editor');
 const before = $<HTMLImageElement>('before');
 const after = $<HTMLCanvasElement>('after');
@@ -40,6 +41,7 @@ const config: Config = {
 
 function setStatus(text: string, fraction?: number) {
   status.hidden = false;
+  status.classList.remove('failed');
   statusText.textContent = text;
   if (fraction !== undefined) bar.style.width = `${Math.round(Math.min(1, fraction) * 100)}%`;
 }
@@ -49,6 +51,8 @@ dropZone(drop, { accept: 'image/jpeg,image/png,image/webp', onFiles: ([f]) => ru
 async function run(file: File) {
   drop.classList.add('compact');
   editor.hidden = true;
+  URL.revokeObjectURL(scanImg.src);
+  scanImg.src = URL.createObjectURL(file);
   setStatus('Starting…', 0);
   const t0 = performance.now();
   try {
@@ -64,6 +68,7 @@ async function run(file: File) {
     draw();
   } catch (e) {
     setStatus(`Something went wrong: ${(e as Error).message}`);
+    status.classList.add('failed');
   }
 }
 

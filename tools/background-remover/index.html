@@ -18,9 +18,9 @@
         <strong>Drop a photo here, paste, or click to choose</strong>
         <span class="muted">JPEG, PNG or WebP · the first run downloads a 44 MB model from this site, then it's cached</span>
       </div>
-      <div class="card" id="status" hidden style="margin-top:16px">
-        <p id="status-text" style="margin-bottom:8px"></p>
-        <div class="progress"><div id="bar"></div></div>
+      <div class="card status" id="status" hidden style="margin-top:16px">
+        <div class="scan"><img id="scan-img" alt="" /></div>
+        <div><p id="status-text"></p><div class="progress"><div id="bar"></div></div></div>
       </div>
       <section id="editor" hidden style="margin-top:16px">
         <div class="card" style="display:grid;gap:14px">
@@ -49,9 +49,9 @@
       </section>
       <section class="about">
         <h2>What it does</h2>
-        <!--tool-features-->
         <p class="muted">Everything happens in this browser tab. Your files are never uploaded, and the network meter at the top shows it.
           <a href="../../#verify">How to verify</a>.</p>
+        <!--tool-features-->
       </section>
     </main>
     <script type="module" src="/src/tools/background/main.ts"></script>

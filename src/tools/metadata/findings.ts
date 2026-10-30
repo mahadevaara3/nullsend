@@ -59,6 +59,11 @@ function exifTiff(c: Container): Uint8Array | undefined {
   return latin1.decode(p.subarray(0, 6)) === 'Exif\0\0' ? p.subarray(6) : p;
 }
 
+// exifr turns a blank GPS block (0/0 rationals) into NaN, and some apps write 0,0 as a placeholder.
+const validGps = (lat: unknown, lon: unknown): lat is number =>
+  typeof lat === 'number' && typeof lon === 'number' && Number.isFinite(lat) && Number.isFinite(lon)
+  && Math.abs(lat) <= 90 && Math.abs(lon) <= 180 && (lat !== 0 || lon !== 0);
+
 /** XMP writes GPS as "DDD,MM.mmN" or "DDD,MM,SSN". Some apps store location only here. */
 function xmpGps(xmp: string): { lat: number; lon: number } | undefined {
   const coord = (tag: string) => {
@@ -68,7 +73,7 @@ function xmpGps(xmp: string): { lat: number; lon: number } | undefined {
     return m[4] === 'S' || m[4] === 'W' ? -v : v;
   };
   const lat = coord('GPSLatitude'), lon = coord('GPSLongitude');
-  return lat !== undefined && lon !== undefined ? { lat, lon } : undefined;
+  return validGps(lat, lon) ? { lat, lon: lon as number } : undefined;
 }
 
 const AI_TOOLS = [
@@ -98,8 +103,9 @@ export async function analyze(file: Blob, c: Container): Promise<Report> {
   // AI and provenance markers live in XMP, C2PA manifests and PNG text chunks.
   const metaText = c.segments.filter((s) => s.kind === 'metadata').map((s) => latin1.decode(s.payload)).join('\n');
 
-  if (typeof t('latitude') === 'number' && typeof t('longitude') === 'number') {
-    report.gps = { lat: t('latitude') as number, lon: t('longitude') as number, alt: t('GPSAltitude') as number | undefined };
+  const lat = t('latitude'), lon = t('longitude');
+  if (validGps(lat, lon)) {
+    report.gps = { lat, lon: lon as number, alt: t('GPSAltitude') as number | undefined };
   } else report.gps = xmpGps(metaText);
   if (report.gps) {
     add('high', 'Exact GPS location', `${report.gps.lat.toFixed(5)}, ${report.gps.lon.toFixed(5)}. This can point to your home or workplace.`);
