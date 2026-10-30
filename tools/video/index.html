@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Video Tools: Trim, Compress and Remove Location From Videos Without Uploading</title>
+    <meta name="description" content="Trim, compress and convert videos, extract the audio, and remove the GPS location phones record in videos. Runs in your browser with WebCodecs; nothing is uploaded." />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="hero">
+        <h1>Video tools</h1>
+        <p>Trim, compress or convert a video, pull out its audio, and remove the GPS location your phone recorded in it.
+          It runs on your device's own video encoder, so even long clips never leave this tab.</p>
+      </section>
+      <div class="drop" id="drop">
+        <strong>Drop a video here, or click to choose</strong>
+        <span class="muted">MP4, MOV, WebM or MKV, or an audio file · read on your device</span>
+      </div>
+      <div class="card status" id="status" hidden style="margin-top:16px">
+        <div class="scan"><img id="scan-img" alt="" /></div>
+        <div><p id="status-text"></p><div class="progress"><div id="bar"></div></div></div>
+        <button class="btn small" id="cancel" hidden>Cancel</button>
+      </div>
+      <section id="editor" hidden>
+        <div class="video-layout">
+          <div class="card player-card">
+            <video id="player" controls playsinline preload="metadata"></video>
+            <p class="muted small mono" id="info"></p>
+            <div class="trim">
+              <div class="range2" id="range2">
+                <div class="range2-fill" id="fill"></div>
+                <input type="range" id="r-start" min="0" step="0.01" value="0" aria-label="Trim start" />
+                <input type="range" id="r-end" min="0" step="0.01" aria-label="Trim end" />
+              </div>
+              <div class="row trim-row">
+                <label class="time">Start <input id="t-start" inputmode="decimal" /></label>
+                <button class="btn small" id="set-start" title="Set start to the current playback time">Set start</button>
+                <span class="muted small" id="length"></span>
+                <span style="flex:1"></span>
+                <button class="btn small" id="set-end" title="Set end to the current playback time">Set end</button>
+                <label class="time">End <input id="t-end" inputmode="decimal" /></label>
+              </div>
+            </div>
+          </div>
+          <aside class="side">
+            <div class="card opts-card">
+              <label class="field">Output
+                <select id="mode">
+                  <option value="copy">Same format, no re-encoding</option>
+                  <option value="mp4">MP4 (compress or convert)</option>
+                  <option value="webm">WebM</option>
+                  <option value="m4a">Audio only, M4A</option>
+                  <option value="wav">Audio only, WAV</option>
+                </select>
+              </label>
+              <p class="muted small" id="mode-hint"></p>
+              <div class="two" id="encode-opts">
+                <label class="field" id="size-field">Resolution
+                  <select id="size"><option value="original">Original</option><option value="1080">1080p</option><option value="720">720p</option><option value="480">480p</option></select>
+                </label>
+                <label class="field">Quality
+                  <select id="level"><option value="high">High</option><option value="medium" selected>Medium</option><option value="small">Small file</option></select>
+                </label>
+              </div>
+              <label class="check" id="mute-field"><input type="checkbox" id="mute" /> Remove sound</label>
+              <label class="check"><input type="checkbox" id="clean" checked /> Remove metadata (location, device, dates)</label>
+              <button class="btn primary" id="export">Export</button>
+              <div id="result"></div>
+            </div>
+            <div class="card" id="found-card" hidden>
+              <h3>Found in this file</h3>
+              <ul class="found" id="found"></ul>
+            </div>
+          </aside>
+        </div>
+      </section>
+      <section class="about">
+        <h2>What it does</h2>
+        <p class="muted">Everything happens in this browser tab. Your files are never uploaded, and the network meter at the top shows it.
+          <a href="../../#verify">How to verify</a>.</p>
+        <!--tool-features-->
+      </section>
+    </main>
+    <script type="module" src="/src/tools/video/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,40 @@
+<h2>What a phone video says about you</h2>
+<p>Phones write metadata into every video, the same way they do for photos. Most of it is invisible in a video player:</p>
+<ul>
+  <li><b>GPS location.</b> iPhones and most Android phones store the coordinates where the clip was recorded, often to within a few
+    meters. A video filmed at home can give away your address.</li>
+  <li><b>Device make and model.</b> For example "Apple iPhone 15 Pro", which narrows down who filmed it.</li>
+  <li><b>Software version.</b> The exact iOS or Android version.</li>
+  <li><b>Recording date and time.</b> When the clip was really filmed, not when it was shared.</li>
+</ul>
+<p>Some apps remove this when you share, many don't, and email, cloud drives and file transfers keep everything. When you open a video
+  here, "Found in this file" lists what it carries.</p>
+
+<h2>Lossless, or re-encoded</h2>
+<p><b>Same format, no re-encoding</b> copies the compressed video and audio into a new file. It's fast, there's no quality loss, and
+  it's the right choice for removing metadata or making a rough cut. A video can only be cut cleanly at a key frame, so the start may
+  move back by up to a couple of seconds.</p>
+<p><b>MP4</b> and <b>WebM</b> decode and re-encode every frame. That's slower, but it allows exact cuts, a smaller resolution and a
+  smaller file. The work is done by your device's own video encoder through the browser's WebCodecs feature, usually the same hardware
+  that records video, so it's much faster than encoders written in JavaScript or WebAssembly.</p>
+
+<h2>How to use it</h2>
+<ol>
+  <li>Drop or choose a video. It plays in the preview, and its format, size and metadata are shown.</li>
+  <li>To cut it, drag the two handles, type times, or play to a point and press <b>Set start</b> or <b>Set end</b>.</li>
+  <li>Choose an output. To make a file smaller, pick MP4 and a lower resolution or quality.</li>
+  <li>Press <b>Export</b>. The file downloads, and the result shows the size change and the metadata check.</li>
+</ol>
+
+<h2>Questions</h2>
+<h3>Which browsers work?</h3>
+<p>Lossless trimming and metadata removal work in any modern browser. Re-encoding needs WebCodecs: Chrome, Edge, Safari 17 and later,
+  or Firefox 130 and later. HEVC videos from iPhones can only be re-encoded where the device can decode HEVC.</p>
+<h3>How big can the video be?</h3>
+<p>The finished file is held in memory before it downloads, so the limit is your device's memory: a few gigabytes on a laptop, less on
+  a phone.</p>
+<h3>Does removing metadata change the picture?</h3>
+<p>No. In "Same format" mode the video and audio data are copied byte for byte. Only the descriptive tags are left out, and the
+  rotation flag stays, so portrait videos stay upright.</p>
+<h3>Why can't I make an MP3?</h3>
+<p>Browsers don't include an MP3 encoder. M4A (AAC) sounds as good at a smaller size and plays everywhere MP3 does.</p>

@@ -14,6 +14,8 @@ const csp = (scriptExtra = '') => [
   "worker-src 'self' blob:",
   "connect-src 'self' blob: data:",
   "img-src 'self' blob: data:",
+  // The video tool previews the chosen file from a local blob URL.
+  "media-src 'self' blob:",
   "style-src 'self' 'unsafe-inline'",
   "object-src 'none'",
   "base-uri 'none'",
@@ -72,6 +74,7 @@ export default defineConfig({
         background: resolve(import.meta.dirname, 'tools/background-remover/index.html'),
         redact: resolve(import.meta.dirname, 'tools/redact/index.html'),
         pdf: resolve(import.meta.dirname, 'tools/pdf/index.html'),
+        video: resolve(import.meta.dirname, 'tools/video/index.html'),
       },
     },
   },

@@ -1,0 +1,37 @@
+#status { grid-template-columns: 72px minmax(0, 1fr) auto; }
+#editor { margin-top: 16px; }
+.video-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 12px; align-items: start; }
+.player-card { display: grid; gap: 12px; }
+.player-card video { display: block; width: 100%; max-height: 60vh; border-radius: 6px; background: #000; }
+.player-card #info { margin: 0; overflow-wrap: anywhere; }
+.small { font-size: 0.82rem; }
+
+/* Two thumbs on one track: the inputs overlap and only their thumbs take pointer input. */
+.range2 { position: relative; height: 28px; }
+.range2::before { content: ''; position: absolute; left: 0; right: 0; top: 12px; height: 4px; border-radius: 2px; background: var(--surface-2); }
+.range2-fill { position: absolute; top: 12px; height: 4px; border-radius: 2px; background: var(--text); }
+.range2 input { position: absolute; inset: 0; width: 100%; margin: 0; background: none; pointer-events: none; -webkit-appearance: none; appearance: none; }
+.range2 input::-webkit-slider-runnable-track { background: none; height: 28px; }
+.range2 input::-moz-range-track { background: none; }
+.range2 input::-webkit-slider-thumb { -webkit-appearance: none; pointer-events: auto; width: 14px; height: 24px; margin-top: 2px; border-radius: 4px;
+  background: var(--text); border: 2px solid var(--bg); cursor: ew-resize; }
+.range2 input::-moz-range-thumb { pointer-events: auto; width: 12px; height: 22px; border-radius: 4px; background: var(--text); border: 2px solid var(--bg); cursor: ew-resize; }
+.range2 input:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--text); outline-offset: 2px; }
+.trim { display: grid; gap: 8px; }
+.trim-row { gap: 8px; }
+.time { display: inline-flex; gap: 6px; align-items: center; font-size: 0.85rem; color: var(--muted); }
+.time input { width: 78px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px;
+  font: 0.85rem var(--mono); }
+
+.side { display: grid; gap: 12px; }
+.opts-card { display: grid; gap: 12px; }
+.field { display: grid; gap: 6px; font-size: 0.85rem; color: var(--muted); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.two[hidden], .field[hidden], .check[hidden] { display: none; }
+select { background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 8px; font: inherit; font-size: 0.9rem; width: 100%; }
+#mode-hint { margin: -4px 0 0; }
+#result:empty { display: none; }
+#found-card h3 { margin: 0 0 8px; }
+.found { margin: 0; padding-left: 1.1em; color: var(--muted); font-size: 0.88rem; overflow-wrap: anywhere; }
+
+@media (max-width: 860px) { .video-layout { grid-template-columns: 1fr; } }

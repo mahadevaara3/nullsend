@@ -66,6 +66,21 @@ export const TOOLS = [
       'Exports pages as PNG or JPEG images at 150 dpi',
     ],
   },
+  {
+    id: 'video',
+    path: 'tools/video/',
+    icon: '🎬',
+    name: 'Video tools',
+    tag: 'Video · WebCodecs',
+    category: 'MultimediaApplication',
+    blurb: 'Trim, compress and convert videos, extract the audio, and remove the GPS location phones record in them.',
+    features: [
+      'Lossless trim and metadata removal that copy the video without re-encoding',
+      'Compress or convert to MP4 (H.264) or WebM (VP9) at 1080p, 720p or 480p, using the device\'s hardware encoder through WebCodecs',
+      'Extract the audio as M4A or WAV, or remove the sound',
+      'Shows and removes GPS location, device make and model, software and recording dates, then re-scans the output to verify',
+    ],
+  },
 ] as const;
 
 export type ToolId = (typeof TOOLS)[number]['id'];

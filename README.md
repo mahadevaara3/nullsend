@@ -10,6 +10,7 @@ Private file tools that run entirely in your browser, built so you don't have to
 | **Background remover** | Cuts out the subject and exports a transparent PNG, a solid color, or a "portrait mode" blur. | ISNet segmentation model (44 MB, quantized) on ONNX Runtime WebAssembly via [@imgly/background-removal](https://github.com/imgly/background-removal-js) |
 | **Redact & Share** | Finds emails, phones, card numbers (Luhn-checked), Aadhaar/PAN, SSN, IBAN, IPs and API keys in screenshots, and blacks them out. Drag to add boxes. | [Tesseract.js](https://github.com/naptha/tesseract.js) OCR + pattern detection mapped back to word boxes |
 | **PDF toolkit** | Merges, splits, reorders and rotates pages; photos to PDF and pages to PNG/JPEG. Removes document info, XMP, PieceInfo, comment authors and the EXIF of embedded JPEGs (losslessly), then re-scans the output. | [pdf-lib](https://github.com/Hopding/pdf-lib) to edit, [PDF.js](https://github.com/mozilla/pdf.js) to render; fonts, cmaps and decoders mirrored into `public/vendor` |
+| **Video tools** | Trims (lossless, key-frame aligned, or exact when re-encoding), compresses and converts to MP4/WebM, extracts audio as M4A/WAV, and removes GPS location, device and date tags, re-scanning the output. | [Mediabunny](https://github.com/Vanilagy/mediabunny) over the browser's WebCodecs encoders, so no 30 MB ffmpeg.wasm download |
 
 ## Why "verifiable" and not just "private"
 
