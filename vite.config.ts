@@ -90,13 +90,22 @@ export default defineConfig({
         icons: [{ src: `${base}icon.svg`, sizes: 'any', type: 'image/svg+xml', purpose: 'any' }],
       },
       workbox: {
-        globPatterns: ['**/*.{html,js,css,svg,txt,xml}'],
+        // Pages are not precached: they're fetched fresh on every visit (below), and
+        // the hashed JS/CSS they reference is precached so the tools still run offline.
+        globPatterns: ['**/*.{js,css,svg,txt,xml}'],
         globIgnores: ['vendor/**'],
         navigateFallback: null,
-        // Models are large and only needed by the tool that uses them, so they are
-        // cached the first time that tool runs instead of on install.
+        // These functions are copied into sw.js as source, so they can't use variables from this file.
         runtimeCaching: [{
-          urlPattern: ({ url }) => url.pathname.startsWith(`${base}vendor/`),
+          // Network first, skipping the HTTP cache, so a deploy shows on the next load.
+          // The saved copy is only used offline.
+          urlPattern: ({ request }) => request.mode === 'navigate',
+          handler: 'NetworkFirst',
+          options: { cacheName: 'nullsend-pages', fetchOptions: { cache: 'no-cache' } },
+        }, {
+          // Models are large and only needed by the tool that uses them, so they are
+          // cached the first time that tool runs instead of on install.
+          urlPattern: ({ url }) => url.pathname.includes('/vendor/'),
           handler: 'CacheFirst',
           options: { cacheName: 'nullsend-vendor', expiration: { maxEntries: 64 } },
         }],
