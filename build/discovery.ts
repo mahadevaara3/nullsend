@@ -10,9 +10,10 @@ import { REPO_URL, SITE_NAME, TAGLINE, TOOLS } from '../src/catalog';
 
 const GOOGLE_SITE_VERIFICATION = 'IZbejoesDXuu2BaDky4puUV2317mw6PRWAwMqmXrSA8';
 
-// Chrome origin trial for WebMCP (document.modelContext), issued for the deployed origin.
-// Tokens are public by design. Without one, the tools register only where WebMCP is on by flag.
-const WEBMCP_TRIAL_TOKEN = process.env.WEBMCP_TRIAL_TOKEN ?? '';
+// Chrome origin trial for WebMCP (document.modelContext), issued for https://mahadevaara3.github.io
+// (and subdomains), expiring 2027-03-30. Tokens are public by design: Chrome only honors one on the
+// origin it was signed for. Set WEBMCP_TRIAL_TOKEN to override it, for example when hosting elsewhere.
+const WEBMCP_TRIAL_TOKEN = process.env.WEBMCP_TRIAL_TOKEN || 'AgscVuxFtLigENJMBRgrp8cqY6VohIw8U+oNrKkQjLSg5D+LxSPHDXW09EYrT+LaGxynn6pbh2HssufDbiNOgQEAAABpeyJvcmlnaW4iOiJodHRwczovL21haGFkZXZhYXJhMy5naXRodWIuaW86NDQzIiwiZmVhdHVyZSI6IldlYk1DUCIsImV4cGlyeSI6MTgwNjM2NDgwMCwiaXNTdWJkb21haW4iOnRydWV9';
 
 // Long-form guide for each tool page, kept as plain HTML in content/<tool id>.html.
 const guide = (id: string) => {

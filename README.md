@@ -44,7 +44,7 @@ In browsers with [WebMCP](https://developer.chrome.com/docs/ai/webmcp/imperative
 
 The tools act on files the user has dropped on the page. Tool inputs and results are JSON, so an agent can't pass a file in, and the file never goes through the model. Only the summaries do. By default those name what was found ("GPS location", "Author"), not the values. `show_values: true` includes them. Tools that download files are marked `consequentialHint`, so agents can ask before running them.
 
-The origin trial token is read from the `WEBMCP_TRIAL_TOKEN` build variable and added as an `origin-trial` meta tag. Without it, the tools still register in Chrome builds where WebMCP is enabled by flag.
+The origin trial token for `mahadevaara3.github.io` (it expires on 2027-03-30) is in [`build/discovery.ts`](build/discovery.ts) and is added to every page as an `origin-trial` meta tag. If you host a copy elsewhere, register your own origin and set the `WEBMCP_TRIAL_TOKEN` build variable.
 
 ## Develop
 
