@@ -1,4 +1,5 @@
 import { mountShell } from '../../core/shell';
+import { NO_FILE, SHOW_VALUES, category, registerTools } from '../../core/webmcp';
 import { dropZone, download, escapeHtml, withSuffix, canvasToBlob } from '../../core/files';
 import { formatBytes } from '../../core/meter';
 import { zip } from '../../core/zip';
@@ -126,8 +127,9 @@ $('rotate').addEventListener('click', () => {
   renderThumbs(sel);
   result.replaceChildren();
 });
-$('delete').addEventListener('click', () => {
-  tiles = tiles.filter((t) => !t.selected);
+$('delete').addEventListener('click', () => removeTiles(selected()));
+function removeTiles(gone: Tile[]) {
+  tiles = tiles.filter((t) => !gone.includes(t));
   for (const s of sources.filter((s) => !tiles.some((t) => t.src === s))) {
     sources.splice(sources.indexOf(s), 1);
     closeSource(s);
@@ -135,7 +137,7 @@ $('delete').addEventListener('click', () => {
   result.replaceChildren();
   if (!tiles.length) { board.hidden = true; drop.classList.remove('compact'); }
   refresh();
-});
+}
 
 // ---------- Reordering ----------
 // Mouse and pen drag straight away. Touch needs a short hold, so a swipe still scrolls.
@@ -206,35 +208,36 @@ const opts = () => ({
 const baseName = () => (sources.length === 1 ? sources[0].name : 'merged.pdf');
 const pad = (n: number, of: number) => String(n).padStart(String(of).length, '0');
 
-async function busy(label: string, work: () => Promise<void>) {
+async function busy(label: string, work: () => Promise<string>): Promise<string> {
   buttons.forEach((b) => (b.disabled = true));
   result.replaceChildren();
   setStatus(label, 0, tiles[0]?.el.querySelector('canvas') ?? undefined);
   try {
-    await work();
+    const summary = await work();
     status.hidden = true;
+    return summary;
   } catch (e) {
     fail(e);
+    throw e;
   } finally {
     refresh();
   }
 }
 
-function report(found: string[], what: string) {
+function report(found: string[], what: string): string {
   const ok = !opts().clean || found.length === 0;
   result.innerHTML = `<div class="notice ${ok ? '' : 'danger'}">${what}
     ${opts().clean ? (ok ? ' ✓ Verified: a re-scan of the new file finds no metadata.' : ` ⚠ Still found: ${found.map(escapeHtml).join('; ')}`) : ' Metadata kept, as you chose.'}</div>`;
+  return result.textContent!.replace(/\s+/g, ' ').trim();
 }
 
-$('save').addEventListener('click', () => busy('Building your PDF…', async () => {
-  const pages = targets();
+const savePdf = (pages: Tile[]) => busy('Building your PDF…', async () => {
   const out = await build(pages, opts());
-  download(new Blob([out as BlobPart], { type: 'application/pdf' }), withSuffix(baseName(), selected().length ? 'pages' : 'edited', 'pdf'));
-  report(await verify(out), `${pages.length} page${pages.length === 1 ? '' : 's'} · ${formatBytes(out.length)}.`);
-}));
+  download(new Blob([out as BlobPart], { type: 'application/pdf' }), withSuffix(baseName(), pages.length < tiles.length ? 'pages' : 'edited', 'pdf'));
+  return report(await verify(out), `${pages.length} page${pages.length === 1 ? '' : 's'} · ${formatBytes(out.length)}.`);
+});
 
-$('split').addEventListener('click', () => busy('Splitting…', async () => {
-  const pages = targets();
+const splitPdf = (pages: Tile[]) => busy('Splitting…', async () => {
   const files: { name: string; data: Uint8Array }[] = [];
   const leftovers = new Set<string>();
   for (const [i, p] of pages.entries()) {
@@ -245,12 +248,10 @@ $('split').addEventListener('click', () => busy('Splitting…', async () => {
   }
   if (files.length === 1) download(new Blob([files[0].data as BlobPart], { type: 'application/pdf' }), files[0].name);
   else download(zip(files), withSuffix(baseName(), 'pages', 'zip'));
-  report([...leftovers], `${files.length} file${files.length === 1 ? '' : 's'}${files.length > 1 ? ' in a .zip' : ''}.`);
-}));
+  return report([...leftovers], `${files.length} file${files.length === 1 ? '' : 's'}${files.length > 1 ? ' in a .zip' : ''}.`);
+});
 
-$('images').addEventListener('click', () => busy('Exporting images…', async () => {
-  const pages = targets();
-  const type = $<HTMLSelectElement>('image-type').value as 'png' | 'jpeg';
+const exportImages = (pages: Tile[], type: 'png' | 'jpeg') => busy('Exporting images…', async () => {
   const files: { name: string; data: Uint8Array }[] = [];
   for (const [i, p] of pages.entries()) {
     setStatus(`Exporting: page ${i + 1} of ${pages.length}`, i / pages.length);
@@ -262,4 +263,109 @@ $('images').addEventListener('click', () => busy('Exporting images…', async ()
   if (files.length === 1) download(new Blob([files[0].data as BlobPart]), files[0].name);
   else download(zip(files), withSuffix(baseName(), 'images', 'zip'));
   result.innerHTML = `<div class="notice">${files.length} image${files.length === 1 ? '' : 's'} at 150 dpi${files.length > 1 ? ', in a .zip' : ''}. Images are drawn fresh, so they carry no metadata.</div>`;
-}));
+  return result.textContent!.trim();
+});
+
+const quiet = (p: Promise<unknown>) => void p.catch(() => {}); // errors are already shown in the status card
+$('save').addEventListener('click', () => quiet(savePdf(targets())));
+$('split').addEventListener('click', () => quiet(splitPdf(targets())));
+$('images').addEventListener('click', () => quiet(exportImages(targets(), $<HTMLSelectElement>('image-type').value as 'png' | 'jpeg')));
+
+// ---------- WebMCP ----------
+
+/** Page numbers are 1-based positions in the current order, as list_pages shows them. */
+function at(numbers: number[] | undefined): Tile[] {
+  if (!tiles.length) throw new Error(NO_FILE);
+  if (!numbers?.length) return [...tiles];
+  const bad = numbers.filter((n) => !Number.isInteger(n) || n < 1 || n > tiles.length);
+  if (bad.length) throw new Error(`No page ${bad.join(', ')}. There are ${tiles.length} pages.`);
+  return [...new Set(numbers)].map((n) => tiles[n - 1]);
+}
+const PAGES = { pages: { type: 'array', items: { type: 'integer' }, description: 'Page numbers (1-based, in the current order). Omit for all pages.' } };
+const CLEAN = { remove_metadata: { type: 'boolean', description: 'Remove author, dates, XMP, comment authors and photo EXIF. Default true.' } };
+const setClean = (v?: boolean) => { $<HTMLInputElement>('clean').checked = v ?? true; };
+
+registerTools([
+  {
+    name: 'list_pages',
+    title: 'List PDF pages',
+    description: 'Lists every page on the board in its current order: page number, the file it came from, its page number in that file, and any extra rotation. Also lists the hidden metadata each loaded file carries.',
+    inputSchema: { type: 'object', properties: { ...SHOW_VALUES } },
+    readOnly: true,
+    execute: ({ show_values }) => {
+      if (!tiles.length) return NO_FILE;
+      return {
+        pages: tiles.map((t, i) => ({ page: i + 1, file: t.src.name, source_page: t.index + 1, extra_rotation: t.rotate })),
+        files: sources.map((s) => ({ file: s.name, kind: s.kind, pages: s.pageCount, metadata: s.found.map((f) => category(f, !!show_values)) })),
+      };
+    },
+  },
+  {
+    name: 'reorder_pages',
+    title: 'Reorder PDF pages',
+    description: 'Puts pages in a new order. Pass the current page numbers in the order they should appear; pages left out keep their relative order after the listed ones.',
+    inputSchema: { type: 'object', properties: { order: { type: 'array', items: { type: 'integer' }, description: 'Current page numbers in the new order.' } }, required: ['order'] },
+    execute: ({ order }) => {
+      const first = at(order);
+      tiles = [...first, ...tiles.filter((t) => !first.includes(t))];
+      result.replaceChildren();
+      refresh();
+      return `New order: ${tiles.map((t) => `${t.src.name} p${t.index + 1}`).join(', ')}`;
+    },
+  },
+  {
+    name: 'rotate_pages',
+    title: 'Rotate PDF pages',
+    description: 'Rotates pages clockwise.',
+    inputSchema: { type: 'object', properties: { ...PAGES, degrees: { type: 'integer', enum: [90, 180, 270] } }, required: ['degrees'] },
+    execute: ({ pages, degrees }) => {
+      const sel = at(pages);
+      sel.forEach((t) => (t.rotate = (t.rotate + degrees) % 360));
+      renderThumbs(sel);
+      result.replaceChildren();
+      return `Rotated ${sel.length} page${sel.length === 1 ? '' : 's'} by ${degrees}°.`;
+    },
+  },
+  {
+    name: 'delete_pages',
+    title: 'Delete PDF pages',
+    description: 'Removes pages from the board. The user\'s original files are not changed.',
+    inputSchema: { type: 'object', properties: { pages: PAGES.pages }, required: ['pages'] },
+    execute: ({ pages }) => {
+      const gone = at(pages);
+      removeTiles(gone);
+      return `Deleted ${gone.length} page${gone.length === 1 ? '' : 's'}. ${tiles.length} left.`;
+    },
+  },
+  {
+    name: 'download_pdf',
+    title: 'Download as PDF',
+    description: 'Builds one PDF from the given pages (or all pages, which merges every loaded file), verifies the metadata removal, and downloads it to the user\'s device.',
+    inputSchema: {
+      type: 'object',
+      properties: { ...PAGES, ...CLEAN, photo_page_size: { type: 'string', enum: ['a4', 'letter', 'image'], description: 'Page size for photos. Default a4.' } },
+    },
+    consequential: true,
+    execute: ({ pages, remove_metadata, photo_page_size }) => {
+      setClean(remove_metadata);
+      if (photo_page_size) $<HTMLSelectElement>('page-size').value = photo_page_size;
+      return savePdf(at(pages));
+    },
+  },
+  {
+    name: 'split_pdf',
+    title: 'Split into single pages',
+    description: 'Saves each of the given pages (or all) as its own PDF, zipped, and downloads it to the user\'s device.',
+    inputSchema: { type: 'object', properties: { ...PAGES, ...CLEAN } },
+    consequential: true,
+    execute: ({ pages, remove_metadata }) => { setClean(remove_metadata); return splitPdf(at(pages)); },
+  },
+  {
+    name: 'export_images',
+    title: 'Export pages as images',
+    description: 'Renders the given pages (or all) as 150 dpi images and downloads them to the user\'s device, zipped when there is more than one.',
+    inputSchema: { type: 'object', properties: { ...PAGES, format: { type: 'string', enum: ['png', 'jpeg'], description: 'Default png.' } } },
+    consequential: true,
+    execute: ({ pages, format = 'png' }) => exportImages(at(pages), format),
+  },
+]);

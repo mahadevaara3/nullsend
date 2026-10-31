@@ -30,6 +30,22 @@ Most "we don't upload your files" sites ask for trust. This one gives you ways t
 - **The redaction you see is the redaction you export.** The canvas is redrawn from the original with boxes burned in; no overlay layer, and no metadata in the PNG.
 - **Offline GPS preview.** Shows the location on a local grid instead of loading map tiles, which would tell a map server where the photo was taken.
 
+## For AI agents: WebMCP
+
+In browsers with [WebMCP](https://developer.chrome.com/docs/ai/webmcp/imperative-api) (Chrome, origin trial), every tool page registers tools that an in-browser agent can call ([`src/core/webmcp.ts`](src/core/webmcp.ts)):
+
+| Page | Tools |
+|---|---|
+| Metadata X-ray | `inspect_metadata`, `remove_metadata` |
+| PDF toolkit | `list_pages`, `reorder_pages`, `rotate_pages`, `delete_pages`, `download_pdf`, `split_pdf`, `export_images` |
+| Video tools | `inspect_video`, `set_trim`, `export_video` |
+| Redact & Share | `list_redactions`, `set_redactions`, `download_redacted` |
+| Background remover | `set_background`, `download_cutout` |
+
+The tools act on files the user has dropped on the page. Tool inputs and results are JSON, so an agent can't pass a file in, and the file never goes through the model. Only the summaries do. By default those name what was found ("GPS location", "Author"), not the values. `show_values: true` includes them. Tools that download files are marked `consequentialHint`, so agents can ask before running them.
+
+The origin trial token is read from the `WEBMCP_TRIAL_TOKEN` build variable and added as an `origin-trial` meta tag. Without it, the tools still register in Chrome builds where WebMCP is enabled by flag.
+
 ## Develop
 
 ```bash

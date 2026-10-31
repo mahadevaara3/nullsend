@@ -1,4 +1,5 @@
 import { mountShell } from '../../core/shell';
+import { NO_FILE, SHOW_VALUES, category, registerTools } from '../../core/webmcp';
 import { dropZone, download, escapeHtml, withSuffix } from '../../core/files';
 import { formatBytes } from '../../core/meter';
 import { canTranscode, probe, run, verify, type Job, type Level, type Mode, type Probe, type Size } from './engine';
@@ -164,8 +165,8 @@ mode.addEventListener('change', updateOptions);
 
 // ---------- Export ----------
 
-exportBtn.addEventListener('click', async () => {
-  if (!file || !info) return;
+async function exportVideo(): Promise<string> {
+  if (!file || !info) throw new Error(NO_FILE);
   const job: Job = {
     mode: mode.value as Mode,
     start: +rStart.value,
@@ -192,14 +193,86 @@ exportBtn.addEventListener('click', async () => {
       ${out.discarded.length ? `<br>⚠ Left out: ${out.discarded.join(', ')} track (not supported in this format).` : ''}
       ${!job.clean ? '<br>Metadata kept, as you chose.' : left.length ? `<br>⚠ Still found: ${left.map(escapeHtml).join('; ')}` : '<br>✓ Verified: a re-scan of the new file finds no location, device or date tags.'}</div>`;
     status.hidden = true;
+    return result.textContent!.replace(/\s+/g, ' ').trim();
   } catch (e) {
-    if ((e as Error).name === 'ConversionCanceledError') status.hidden = true;
-    else fail(e);
+    if ((e as Error).name === 'ConversionCanceledError') { status.hidden = true; return 'Canceled.'; }
+    fail(e);
+    throw e;
   } finally {
     exportBtn.disabled = false;
     cancelBtn.hidden = true;
     signal.cancel = undefined;
   }
-});
+}
+
+exportBtn.addEventListener('click', () => void exportVideo().catch(() => {}));
 
 cancelBtn.addEventListener('click', () => { void signal.cancel?.(); });
+
+// ---------- WebMCP ----------
+
+function setTrim(start?: number, end?: number) {
+  if (!info) throw new Error(NO_FILE);
+  if (start !== undefined) rStart.value = String(Math.max(0, Math.min(info.duration, start)));
+  if (end !== undefined) rEnd.value = String(Math.max(0, Math.min(info.duration, end)));
+  if (+rEnd.value <= +rStart.value) throw new Error(`End must be after start (video is ${info.duration.toFixed(2)} s long).`);
+  syncTrim();
+}
+
+registerTools([
+  {
+    name: 'inspect_video',
+    title: 'Inspect the loaded video',
+    description: 'Describes the video the user loaded on this page: container, codecs, resolution, duration, size, the current trim range, the output formats this browser can make, and hidden metadata such as GPS location, device and recording date.',
+    inputSchema: { type: 'object', properties: { ...SHOW_VALUES } },
+    readOnly: true,
+    execute: ({ show_values }) => {
+      if (!file || !info) return NO_FILE;
+      return {
+        file: file.name, bytes: file.size, container: info.container, duration_s: +info.duration.toFixed(3),
+        video: info.video ?? null, audio: info.audio ?? null,
+        trim: { start_s: +rStart.value, end_s: +rEnd.value },
+        available_outputs: Array.from(mode.options).filter((o) => !o.disabled).map((o) => o.value),
+        metadata: info.found.map((f) => category(f, !!show_values)),
+      };
+    },
+  },
+  {
+    name: 'set_trim',
+    title: 'Set the trim range',
+    description: 'Sets which part of the video to keep, in seconds. The page shows the new range.',
+    inputSchema: { type: 'object', properties: { start: { type: 'number', description: 'Seconds. Omit to keep the current start.' }, end: { type: 'number', description: 'Seconds. Omit to keep the current end.' } } },
+    execute: ({ start, end }) => { setTrim(start, end); return `Keeping ${(+rEnd.value - +rStart.value).toFixed(2)} s, from ${(+rStart.value).toFixed(2)} s to ${(+rEnd.value).toFixed(2)} s.`; },
+  },
+  {
+    name: 'export_video',
+    title: 'Export the video',
+    description: 'Makes the output file on the user\'s device and downloads it. "copy" is fast and lossless (cuts snap to key frames); "mp4"/"webm" re-encode with exact cuts and can shrink the file; "m4a"/"wav" keep only the audio. Optionally sets the trim range first.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        output: { type: 'string', enum: ['copy', 'mp4', 'webm', 'm4a', 'wav'], description: 'Default copy.' },
+        resolution: { type: 'string', enum: ['original', '1080', '720', '480'], description: 'For mp4/webm. Never upscales. Default original.' },
+        quality: { type: 'string', enum: ['high', 'medium', 'small'], description: 'For mp4/webm. Default medium.' },
+        mute: { type: 'boolean', description: 'Remove the sound. Default false.' },
+        remove_metadata: { type: 'boolean', description: 'Remove location, device and date tags. Default true.' },
+        start: { type: 'number', description: 'Trim start in seconds.' },
+        end: { type: 'number', description: 'Trim end in seconds.' },
+      },
+    },
+    consequential: true,
+    execute: ({ output = 'copy', resolution = 'original', quality = 'medium', mute = false, remove_metadata = true, start, end }) => {
+      if (!info) throw new Error(NO_FILE);
+      const option = Array.from(mode.options).find((o) => o.value === output);
+      if (!option || option.disabled) throw new Error(`"${output}" isn't available for this file in this browser.`);
+      if (start !== undefined || end !== undefined) setTrim(start, end);
+      mode.value = output;
+      updateOptions();
+      $<HTMLSelectElement>('size').value = resolution;
+      $<HTMLSelectElement>('level').value = quality;
+      $<HTMLInputElement>('mute').checked = mute;
+      $<HTMLInputElement>('clean').checked = remove_metadata;
+      return exportVideo();
+    },
+  },
+]);

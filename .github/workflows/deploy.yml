@@ -32,6 +32,7 @@ jobs:
       - run: npm run build
         env:
           BASE_PATH: /nullsend/
+          WEBMCP_TRIAL_TOKEN: ${{ vars.WEBMCP_TRIAL_TOKEN }}
           SITE_URL: https://mahadevaara3.github.io/nullsend/
       - uses: actions/upload-pages-artifact@v3
         with:

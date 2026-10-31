@@ -1,4 +1,5 @@
 import { mountShell } from '../../core/shell';
+import { NO_FILE, SHOW_VALUES, registerTools } from '../../core/webmcp';
 import { dropZone, download, escapeHtml, withSuffix } from '../../core/files';
 import { formatBytes } from '../../core/meter';
 import { parseContainer, stripMetadata, type Container, type SegmentKind } from './container';
@@ -144,6 +145,7 @@ function clean(item: Item) {
     ${ok ? '✓ Verified: a re-scan of the new file finds no metadata' : '⚠ Some metadata could not be removed'}${onlyOrientation ? ' (except the rotation flag you chose to keep)' : ''}.
     ${formatBytes(c.bytes.length - out.length)} removed. ${pixelsSame ? 'Pixel data is byte-for-byte identical, with no re-compression.' : 'Pixel data changed unexpectedly.'}</div>`;
   download(new Blob([out as BlobPart], { type: file.type || `image/${c.format}` }), withSuffix(file.name, 'clean'));
+  return card.querySelector('.result')!.textContent!.replace(/\s+/g, ' ').trim();
 }
 
 // Compared as one run of bytes: a HEIC media block splits into several image segments
@@ -169,3 +171,54 @@ document.getElementById('clean-all')!.addEventListener('click', async () => {
     await new Promise((r) => setTimeout(r, 250)); // browsers throttle rapid back-to-back downloads
   }
 });
+
+// ---------- WebMCP ----------
+
+const pick = (name?: string) => {
+  if (!items.length) throw new Error(NO_FILE);
+  const found = name ? items.filter((i) => i.file.name === name) : items;
+  if (!found.length) throw new Error(`No loaded file is named "${name}". Loaded: ${items.map((i) => i.file.name).join(', ')}`);
+  return found;
+};
+const FILE = { file: { type: 'string', description: 'File name as listed by inspect_metadata. Omit for every loaded file.' } };
+
+registerTools([
+  {
+    name: 'inspect_metadata',
+    title: 'Inspect photo metadata',
+    description: 'Lists the photos the user loaded on this page and the hidden data each one carries: GPS location, device serial numbers, dates, author, AI-generation markers and C2PA credentials.',
+    inputSchema: { type: 'object', properties: { ...FILE, ...SHOW_VALUES } },
+    readOnly: true,
+    execute: ({ file, show_values }) => pick(file).map(({ file: f, container: c, report: r }) => ({
+      file: f.name,
+      format: c.format,
+      bytes: f.size,
+      metadata_blocks: c.segments.filter((s) => s.kind === 'metadata' || s.kind === 'trailer').length,
+      findings: r.findings.map((x) => ({ severity: x.severity, kind: x.title, ...(show_values ? { value: x.detail } : {}) })),
+    })),
+  },
+  {
+    name: 'remove_metadata',
+    title: 'Remove photo metadata',
+    description: 'Removes all metadata from the loaded photos without re-encoding the pixels, verifies the result by re-scanning it, and downloads the cleaned copies to the user\'s device. The originals are not changed.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        ...FILE,
+        keep_rotation: { type: 'boolean', description: 'Keep the rotation flag so portrait photos stay upright. Default true.' },
+        keep_color_profile: { type: 'boolean', description: 'Keep the ICC color profile. Default true.' },
+      },
+    },
+    consequential: true,
+    execute: async ({ file, keep_rotation = true, keep_color_profile = true }) => {
+      keepOrient.checked = keep_rotation;
+      keepColor.checked = keep_color_profile;
+      const out: string[] = [];
+      for (const item of pick(file)) {
+        out.push(`${item.file.name}: ${clean(item)}`);
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      return out.join('\n');
+    },
+  },
+]);

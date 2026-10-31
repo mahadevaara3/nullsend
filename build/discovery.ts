@@ -10,6 +10,10 @@ import { REPO_URL, SITE_NAME, TAGLINE, TOOLS } from '../src/catalog';
 
 const GOOGLE_SITE_VERIFICATION = 'IZbejoesDXuu2BaDky4puUV2317mw6PRWAwMqmXrSA8';
 
+// Chrome origin trial for WebMCP (document.modelContext), issued for the deployed origin.
+// Tokens are public by design. Without one, the tools register only where WebMCP is on by flag.
+const WEBMCP_TRIAL_TOKEN = process.env.WEBMCP_TRIAL_TOKEN ?? '';
+
 // Long-form guide for each tool page, kept as plain HTML in content/<tool id>.html.
 const guide = (id: string) => {
   const file = join(import.meta.dirname, '..', 'content', `${id}.html`);
@@ -79,6 +83,7 @@ ${guide(tool.id)}` : '');
       return { html: blocks(out), tags: [
         { tag: 'link', attrs: { rel: 'canonical', href: url(path) }, injectTo: 'head' },
         { tag: 'meta', attrs: { name: 'robots', content: 'index, follow' }, injectTo: 'head' },
+        ...(WEBMCP_TRIAL_TOKEN ? [{ tag: 'meta', attrs: { 'http-equiv': 'origin-trial', content: WEBMCP_TRIAL_TOKEN }, injectTo: 'head-prepend' as const }] : []),
         // Search Console ownership (HTML-tag method; the HTML-file method is public/google*.html).
         { tag: 'meta', attrs: { name: 'google-site-verification', content: GOOGLE_SITE_VERIFICATION }, injectTo: 'head' },
         { tag: 'meta', attrs: { property: 'og:type', content: 'website' }, injectTo: 'head' },
@@ -112,6 +117,10 @@ ${SITE_NAME} is a set of free, open-source file tools. Every tool runs entirely 
 ## Tools
 
 ${TOOLS.map((t) => `- [${t.name}](${url(t.path)}): ${t.blurb}\n${t.features.map((f) => `  - ${f}`).join('\n')}`).join('\n')}
+
+## For AI agents (WebMCP)
+
+Each tool page registers WebMCP tools (\`document.modelContext\`) in browsers that support it, such as inspect_metadata, remove_metadata, list_pages, download_pdf, inspect_video and export_video. They work on files the user drops on the page: agents cannot pass files in, so a file never goes through the model. Findings are returned as categories unless show_values is set.
 
 ## How to verify the privacy claim
 

@@ -1,5 +1,6 @@
 import { createWorker, OEM, type Worker as OcrWorker } from 'tesseract.js';
 import { BASE, mountShell } from '../../core/shell';
+import { NO_FILE, registerTools } from '../../core/webmcp';
 import { canvasToBlob, dropZone, download, escapeHtml, withSuffix } from '../../core/files';
 import { detect, type Box, type Word } from './detect';
 import './redact.css';
@@ -181,3 +182,55 @@ share.addEventListener('click', async () => {
   const file = new File([await output()], outName(), { type: 'image/png' });
   await navigator.share({ files: [file] }).catch(() => {});
 });
+
+// ---------- WebMCP ----------
+
+const need = () => { if (!image) throw new Error(NO_FILE); };
+
+registerTools([
+  {
+    name: 'list_redactions',
+    title: 'List detected sensitive text',
+    description: 'Lists what the on-device OCR found in the loaded screenshot (emails, phone numbers, card numbers, ID numbers, API keys) and whether each is covered.',
+    inputSchema: {
+      type: 'object',
+      properties: { show_values: { type: 'boolean', description: 'Include the detected text itself. Default false: these are secrets the user wants hidden, so only set true if the user explicitly asks.' } },
+    },
+    readOnly: true,
+    execute: ({ show_values }) => {
+      need();
+      return { style, redactions: redactions.map((r) => ({ id: r.id, type: r.type, covered: r.on, ...(show_values ? { text: r.text } : {}) })) };
+    },
+  },
+  {
+    name: 'set_redactions',
+    title: 'Cover or uncover detected text',
+    description: 'Turns covering on or off for the given redaction ids (from list_redactions), and optionally switches between solid boxes and pixelation. Solid is the safe default.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        ids: { type: 'array', items: { type: 'integer' }, description: 'Omit to apply to all.' },
+        covered: { type: 'boolean' },
+        style: { type: 'string', enum: ['solid', 'pixelate'] },
+      },
+    },
+    execute: ({ ids, covered, style: next }) => {
+      need();
+      if (covered !== undefined) for (const r of redactions) if (!ids || ids.includes(r.id)) r.on = covered;
+      if (next) document.querySelector<HTMLButtonElement>(`[data-style="${next}"]`)?.click();
+      render();
+      return `${redactions.filter((r) => r.on).length} of ${redactions.length} covered, style ${style}.`;
+    },
+  },
+  {
+    name: 'download_redacted',
+    title: 'Download the redacted image',
+    description: 'Downloads the redacted screenshot as a new PNG to the user\'s device. The covered text and the original file\'s metadata are not in it.',
+    consequential: true,
+    execute: async () => {
+      need();
+      download(await output(), outName());
+      return `Downloaded ${outName()} with ${redactions.filter((r) => r.on).length} area(s) covered.`;
+    },
+  },
+]);

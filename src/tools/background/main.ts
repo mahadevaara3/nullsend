@@ -1,5 +1,6 @@
 import { removeBackground, type Config } from '@imgly/background-removal';
 import { BASE, mountShell } from '../../core/shell';
+import { NO_FILE, registerTools } from '../../core/webmcp';
 import { canvasToBlob, dropZone, download, withSuffix } from '../../core/files';
 import { formatBytes } from '../../core/meter';
 import './background.css';
@@ -127,3 +128,39 @@ $('copy').addEventListener('click', async (e) => {
 });
 
 $('another').addEventListener('click', () => drop.click());
+
+// ---------- WebMCP ----------
+
+registerTools([
+  {
+    name: 'set_background',
+    title: 'Set the background',
+    description: 'Changes what is behind the cut-out subject in the loaded photo: transparent, a solid color, or a blurred copy of the original.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        background: { type: 'string', enum: ['transparent', 'color', 'blur'] },
+        color: { type: 'string', description: 'CSS hex color such as #ffffff, for background "color".' },
+      },
+      required: ['background'],
+    },
+    execute: ({ background, color: hex }) => {
+      if (!source) throw new Error(`${NO_FILE} The cut-out also has to finish first.`);
+      if (hex) color.value = hex;
+      setBg(background);
+      return `Background set to ${background}${background === 'color' ? ` ${color.value}` : ''}.`;
+    },
+  },
+  {
+    name: 'download_cutout',
+    title: 'Download the result',
+    description: 'Downloads the result as a PNG to the user\'s device.',
+    consequential: true,
+    execute: async () => {
+      if (!source) throw new Error(NO_FILE);
+      const name = withSuffix(source.file.name, bg === 'transparent' ? 'cutout' : 'edited', 'png');
+      download(await canvasToBlob(after), name);
+      return `Downloaded ${name} (${after.width}×${after.height}).`;
+    },
+  },
+]);
